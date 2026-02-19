@@ -1,0 +1,3984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TGE 1150 — What Is Your Paradigm?</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { height: 100%; }
+    body { font-family: Georgia, serif; background: #0F2137; }
+    textarea, button { font-family: Georgia, serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const { useState, useRef, useEffect } = React;
+// ─── PARADIGM DATA ────────────────────────────────────────────────────────────
+
+const PARADIGMS = {
+  Positivism: {
+    emoji: "🔬",
+    color: "#1B4F8A",
+    light: "#DBEAFE",
+    tagline: "If you can't measure it, it doesn't count.",
+    ont: "Facts are facts. The deadlines were missed — that's not an opinion, it's in the record.",
+    epist: "You trust numbers, timelines, and documented evidence. If it isn't written down and verifiable, it doesn't carry much weight.",
+    axio: "Keep feelings out of it. A good decision is based on data, not on who likes who or how someone felt that day.",
+    supervisorCard: {
+      reminder: "You're a 'show me the numbers' person. You're not trying to be harsh — you just believe the fairest thing you can do is stick to the facts. Personal stories don't change what the record shows.",
+      approach: ["Ask for specifics: which deadlines, which projects, how many days late?", "Compare Jordan's numbers to the rest of the team", "Lay out a clear improvement plan with measurable goals", "Keep it professional — this isn't personal, it's about performance data"],
+      avoid: "Don't ask how Jordan is feeling or what's been hard for them. That's not your focus right now — the data is."
+    },
+    employeeCard: {
+      reminder: "You're not going to get emotional or make excuses. You're going to fight back with facts — because you have them.",
+      approach: ["Come with your own numbers: tasks assigned, hours worked, what changed mid-project", "Point to things that can actually be verified — not just how it felt, but what the records show", "Ask for clarity on what 'on time' actually means going forward", "Own what the data shows, but make sure the full picture is on the table"],
+      avoid: "Don't get defensive or emotional. Stay calm and let the evidence do the talking."
+    }
+  },
+  "Post-positivism": {
+    emoji: "🔭",
+    color: "#5B3A8A",
+    light: "#EDE9FE",
+    tagline: "The full picture is always a little blurry — stay curious.",
+    ont: "Something real happened with those deadlines. But your first read of the situation might not be the whole story.",
+    epist: "You look at evidence, but you know one source isn't enough. You want multiple angles before you draw a conclusion.",
+    axio: "You try to be objective, but you're honest enough to admit your own perspective can get in the way.",
+    supervisorCard: {
+      reminder: "You came in with data — but you're holding it loosely. You've been wrong before, and you know it. Your job right now is to get closer to the truth, not to win.",
+      approach: ["Share what you've observed, but own that it's your read — not the final word", "Actually listen to Jordan's side and let it change how you see things if it should", "Be honest if you realize you missed something or contributed to the problem", "Work toward a shared understanding, not just your version of events"],
+      avoid: "Don't walk in like you already have all the answers. Stay genuinely open — even if it's uncomfortable."
+    },
+    employeeCard: {
+      reminder: "You know this situation is complicated. You're not going to pretend you did everything perfectly, but you also know there's more to the story than what your supervisor sees.",
+      approach: ["Acknowledge that the missed deadlines are a real concern — don't brush past that", "Share your side, but be honest that your view isn't complete either", "Be open if your supervisor brings up something you hadn't considered", "Push toward a solution that actually reflects what both of you now know"],
+      avoid: "Don't over-explain or get defensive. Be real about what you know and what you don't."
+    }
+  },
+  Interpretivism: {
+    emoji: "🫂",
+    color: "#166534",
+    light: "#DCFCE7",
+    tagline: "People make sense of situations differently — understanding that is the job.",
+    ont: "What a 'missed deadline' means depends on who you are and what you've been going through. Context changes everything.",
+    epist: "You learn what's really going on by listening — actually listening — not by reading a report.",
+    axio: "Relationships matter more than rules. You can't solve a people problem without treating people like people.",
+    supervisorCard: {
+      reminder: "You're not here to catch Jordan doing something wrong. You want to understand what's actually been happening for them. You genuinely believe you can't fix this until you do.",
+      approach: ["Start by asking how things have been going — and mean it", "Listen way more than you talk. You're gathering information, not making a case", "Recognize that Jordan's experience of this situation is real and relevant", "Build the solution together based on what you actually learn, not what you assumed coming in"],
+      avoid: "Don't lead with the data or the consequences. If you go there first, the conversation is over before it starts."
+    },
+    employeeCard: {
+      reminder: "You need to be heard before you can be helped. You're not just answering for missed deadlines — you're trying to help your supervisor actually understand your experience.",
+      approach: ["Read the room — does your supervisor seem like they actually want to understand, or just close the case?", "If it feels safe, share what's really been going on — the competing priorities, the unclear expectations", "Ask what success actually looks like from their side", "Push for a solution that fits how you actually work, not just one that sounds good on paper"],
+      avoid: "Don't just agree to a plan you can't follow. Speak up for what you actually need."
+    }
+  },
+  "Critical Theory": {
+    emoji: "⚖️",
+    color: "#92400E",
+    light: "#FEF3C7",
+    tagline: "Ask who made the rules — and who they protect.",
+    ont: "The workplace isn't a level playing field. The rules, deadlines, and standards were set by people with power, and they usually work better for some people than others.",
+    epist: "To really understand what's happening, you have to ask: who benefits from the way things are set up right now?",
+    axio: "Fairness isn't just treating everyone the same — it's asking whether the system itself is fair to begin with.",
+    supervisorCard: {
+      reminder: "You don't think Jordan is lazy or irresponsible. You think the system may be set up in a way that makes it harder for some people to succeed than others — and that's partly on you.",
+      approach: ["Ask whether Jordan's workload is actually comparable to their teammates'", "Think about whether your deadline system is working for the team or just for management", "Invite Jordan to name what's getting in the way — not just their choices, but the setup", "Think bigger than Jordan's individual plan — what needs to change organizationally?"],
+      avoid: "Don't make this entirely Jordan's problem to fix. You have power here. Use it to look at the bigger picture."
+    },
+    employeeCard: {
+      reminder: "This isn't just about you missing deadlines. The system you're working in may not be set up fairly, and you have every right to say that.",
+      approach: ["Call it out directly: the workload isn't equal, the expectations aren't fair, the setup isn't working", "Ask whether your teammates in different roles face the same standards", "Push back on the idea that 'meeting the deadline' is some neutral, obvious thing — it depends on what you were given to work with", "Be clear about what needs to change, not just what you'll do differently"],
+      avoid: "Don't let this end with you agreeing to work harder in a system that's already asking too much of you."
+    }
+  }
+};
+const PARADIGM_NAMES = Object.keys(PARADIGMS);
+const SCENARIO = "Jordan has missed three project deadlines in the past month. The work that does get turned in is solid — but it's consistently late, and it's starting to affect the team.";
+
+// ─── PARADIGM ASSESSMENT (10 questions, forced-choice, 4 options each) ─────────
+
+const ASSESSMENT_QUESTIONS = [{
+  prompt: "When there's a disagreement at work about why a project failed, I think the most useful first step is:",
+  options: [{
+    text: "Pull the data — look at timelines, outputs, and records to find out exactly what happened.",
+    paradigm: "Positivism"
+  }, {
+    text: "Gather input from multiple people involved — everyone's account adds something to the picture.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "Talk to the people involved one-on-one to understand what they actually experienced.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "Ask who had the most to lose and who had the most power — that usually reveals the real story.",
+    paradigm: "Critical Theory"
+  }]
+}, {
+  prompt: "When I evaluate whether a decision at work was good or bad, I rely most on:",
+  options: [{
+    text: "Measurable outcomes — did it hit the target, improve the numbers, or solve the documented problem?",
+    paradigm: "Positivism"
+  }, {
+    text: "Evidence from multiple angles — I try not to judge based on one data point alone.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "How the people affected experienced it — whether it felt fair and made sense in their lives.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "Who benefited and who was burdened — equity tells me more than efficiency.",
+    paradigm: "Critical Theory"
+  }]
+}, {
+  prompt: "A manager and an employee have completely different accounts of the same conversation. I think:",
+  options: [{
+    text: "One of them is more accurate — there are facts about what was actually said that can be verified.",
+    paradigm: "Positivism"
+  }, {
+    text: "Both probably have partial truths — memory and perspective shape what people recall.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "Both accounts are real — each person experienced the conversation differently and that matters.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "The power difference between them likely shapes whose version gets believed.",
+    paradigm: "Critical Theory"
+  }]
+}, {
+  prompt: "When I'm told a workplace policy 'applies to everyone equally,' I tend to think:",
+  options: [{
+    text: "That's how it should work — consistent rules prevent bias and favoritism.",
+    paradigm: "Positivism"
+  }, {
+    text: "Probably true in intent, but worth checking whether it actually plays out that way in practice.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "Equal rules don't mean equal impact — people's situations are too different.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "Policies that look neutral often protect those who designed them.",
+    paradigm: "Critical Theory"
+  }]
+}, {
+  prompt: "The best way to improve a struggling team is to:",
+  options: [{
+    text: "Identify the performance gaps with data and build a measurable improvement plan.",
+    paradigm: "Positivism"
+  }, {
+    text: "Gather honest feedback from multiple sources and stay open to revising your read of the problem.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "Create space for team members to share what's actually going on for them.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "Look at whether workload, resources, and recognition are distributed fairly across the team.",
+    paradigm: "Critical Theory"
+  }]
+}, {
+  prompt: "If two employees are both working hard but one consistently outperforms the other, I think:",
+  options: [{
+    text: "The difference is real and measurable — performance data shows what's actually happening.",
+    paradigm: "Positivism"
+  }, {
+    text: "There are probably multiple factors at play — effort alone doesn't tell the whole story.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "Context matters — personal circumstances, support systems, and role fit all influence results.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "One person may be working against structural disadvantages the other doesn't face.",
+    paradigm: "Critical Theory"
+  }]
+}, {
+  prompt: "When I give feedback to someone, I think the most important thing is to:",
+  options: [{
+    text: "Be specific and factual — stick to what I observed, not what I felt about it.",
+    paradigm: "Positivism"
+  }, {
+    text: "Be honest about what I observed while acknowledging I might not have the full picture.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "Make sure they feel heard and safe before I say anything critical.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "Be honest about how power dynamics in the workplace might be shaping the situation.",
+    paradigm: "Critical Theory"
+  }]
+}, {
+  prompt: "When a conflict arises between two coworkers, I think the most productive starting point is:",
+  options: [{
+    text: "Establish the facts — what was said, what was done, and what the record shows.",
+    paradigm: "Positivism"
+  }, {
+    text: "Hear from both sides and resist drawing conclusions until you have multiple perspectives.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "Understand what each person was experiencing — the meaning behind the conflict matters.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "Look at whether an imbalance of power or resources is driving the tension.",
+    paradigm: "Critical Theory"
+  }]
+}, {
+  prompt: "I think the purpose of a performance review is primarily to:",
+  options: [{
+    text: "Measure actual output against objective goals and document the results.",
+    paradigm: "Positivism"
+  }, {
+    text: "Create a shared, evidence-based understanding of performance that both parties can refine.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "Have a genuine conversation about how the work is going and what the person needs.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "Surface whether the conditions for success are equitable — not just whether results were hit.",
+    paradigm: "Critical Theory"
+  }]
+}, {
+  prompt: "When I try to understand why something went wrong at work, I instinctively focus on:",
+  options: [{
+    text: "The gap between what was planned and what was measured — where did execution break down?",
+    paradigm: "Positivism"
+  }, {
+    text: "Gathering multiple accounts and staying open to revising my initial explanation.",
+    paradigm: "Post-positivism"
+  }, {
+    text: "The people involved and what they were experiencing when it happened.",
+    paradigm: "Interpretivism"
+  }, {
+    text: "Whether the conditions — resources, support, power — were set up fairly from the start.",
+    paradigm: "Critical Theory"
+  }]
+}];
+function shuffleArray(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+function pickDifferentParadigm(chosen) {
+  return pickRandom(PARADIGM_NAMES.filter(p => p !== chosen));
+}
+function scoreAssessment(answers) {
+  const scores = {};
+  PARADIGM_NAMES.forEach(p => {
+    scores[p] = 0;
+  });
+  answers.forEach(paradigm => {
+    if (paradigm) scores[paradigm]++;
+  });
+  const sorted = PARADIGM_NAMES.slice().sort((a, b) => scores[b] - scores[a]);
+  return {
+    scores,
+    primary: sorted[0],
+    secondary: sorted[1]
+  };
+}
+
+// ─── AI SCRIPTS ───────────────────────────────────────────────────────────────
+
+const AI_SCRIPTS = {
+  Positivism: {
+    supervisor: ["Jordan, I asked you in because the data is clear — three missed deadlines in the past month. Project Alpha was four days late, the Q3 report two days, and the client deck three days. I need to understand what's driving this pattern.", "I appreciate that. But I need to look at this objectively. Your output quality is solid — that's documented. The issue is strictly the timeline metric. What specifically caused each of those three delays?", "Okay, the scope change on Alpha is in the log — I can verify that. The other two don't have documented scope changes. I'm going to need evidence of the workload issue, not just a description.", "That's a start. Here's what I'm proposing: a measurable improvement plan. Flag any scope change within 24 hours, and I'll track on-time delivery weekly. If we hit 90% over the next month, we consider this resolved.", "Let's agree on the metrics and move forward. I'll document this conversation and review the numbers in four weeks. The quality is already there — I just need the timeline to match."],
+    employee: ["I hear you. The deadlines were missed, I'm not disputing that. But I want to make sure we're looking at all the data, not just the delivery dates.", "The scope on Project Alpha expanded by 40% two weeks in — that's in the change log. For the Q3 report, I was also assigned the client deck in the same week. I was handling two major deliverables simultaneously.", "I can show you the task log. At the time of the Q3 deadline I had 23 open action items. The team average was 14. Those are numbers you can verify.", "A tracking system makes sense. But I'd want scope changes and assignment volume included too. Being late because I had two deadlines in one week is a different problem than just being slow.", "Agreed. I'll document scope changes and flag conflicts proactively. I just want the record to reflect the full picture, not only the output dates."]
+  },
+  "Post-positivism": {
+    supervisor: ["Jordan, thanks for coming in. I've been looking at the deadline data, but I also want to hear your side. My read on this might not be the whole story.", "That's really helpful context. I should be honest — I wasn't aware of the scope change on Alpha. That changes my interpretation of that delay. What about the other two? I'm trying to build a fuller picture here.", "I can see how that created a bind. Part of what I'm realizing is that our project intake process may have contributed — I may have approved overlapping timelines without thinking through the downstream impact.", "I want to be careful not to overcorrect based on one month of data. What do you think would actually help? I don't want to impose a solution without understanding what you think is driving this.", "We probably both have partial views here. What if you flag capacity concerns early and I commit to reviewing them before approving new assignments? That way we're both accountable. Let's check in in two weeks."],
+    employee: ["I'm glad we're talking. The deadlines were missed and I'm not here to deny that. But I think there's more to the picture than the delivery dates alone.", "On Project Alpha, the scope expanded significantly mid-project. I may not have communicated the impact clearly — I assumed I could absorb it. In hindsight, that was probably my mistake.", "I honestly don't have a complete explanation for all three delays. Some of it was workload, some was unclear priorities. I may have made poor judgment calls about what to tackle first.", "I think I'm not always sure when it's okay to push back on a deadline. I don't want to seem like I'm making excuses, so I try to make it work — even when I probably should've flagged the problem earlier.", "Earlier communication makes sense on my end. But I want to ask — if I flag a capacity issue, would you actually be able to do something about it? Or would the deadline stay fixed regardless?"]
+  },
+  Interpretivism: {
+    supervisor: ["Jordan, I appreciate you taking the time. I want to start by just asking — how have things been going for you lately? I want to understand what's been happening from your perspective before we talk about anything else.", "That sounds really difficult. Managing all of that at once while trying to maintain quality — I can see why the timelines got stretched. What kind of support would have made a difference?", "I hear you. And I want you to know that the quality of your work hasn't gone unnoticed — it's genuinely strong. I think I've been assuming you'd speak up if something was too much. How can I make it easier for you to tell me when you're stretched?", "I really value that you shared that with me. I want to find a solution that works for you, not just one that looks good on paper. What would feel sustainable going forward?", "Then let's build that together. I don't want to hand you a plan — I want us to create one that actually reflects how you work and what you need. Can we schedule time this week to do that properly?"],
+    employee: ["Honestly? It's been a lot. The past month has been really overwhelming — I've been trying to keep up but I think I've been running on empty for a while.", "The deadlines slipped because I was genuinely spread too thin. But more than the workload, I've been hesitant to say anything because I didn't want it to seem like I couldn't handle things.", "What would have helped is just knowing it was okay to ask for help. Or to say 'this timeline isn't realistic.' I don't always feel like there's space for that conversation.", "I think I need clearer signals that it's okay to flag problems without it reflecting badly on me. Something as simple as a regular check-in where I could raise capacity issues — without it automatically becoming a performance conversation.", "I'd really like that. What I've been missing is just feeling like someone is actually interested in what's going on for me — not just the output."]
+  },
+  "Critical Theory": {
+    supervisor: ["Jordan, before I say anything about the deadlines, I want to ask: do you feel like your workload has been equitable compared to your teammates? I've been wondering if our assignment process is setting some people up to struggle.", "That's significant. If you're consistently carrying more than your peers, that's not a you problem — that's a structural problem. I'm partly responsible for that, and I want to be honest about it.", "I think the uncomfortable truth is that our deadline system was designed around an ideal workload that doesn't reflect how work actually gets distributed. I've been enforcing a standard that may not be fair to apply uniformly.", "I want to do more than adjust your individual plan. I think we need to look at how assignments are distributed across the whole team. Would you be willing to help me document the inequity you've experienced?", "I hear your skepticism — it's reasonable to wonder whether this leads to real change or just another performance plan. I'm going to bring workload distribution data to the team leads meeting. I can't promise overnight change, but I'm committing to making it visible."],
+    employee: ["Since you're asking directly — no, it hasn't felt equitable. I've been carrying significantly more than some peers, and that's part of why the deadlines slipped.", "It's not just the volume. The types of projects I get tend to be more complex and less defined — but they're measured against the same deadline standards as simpler tasks.", "I've raised this before, informally. Nothing changed. Honestly, I wasn't sure whether flagging it would just make me look like I was complaining rather than raising a legitimate concern.", "I appreciate that. But I've been in organizations where this conversation happens and the same patterns continue. What's different this time? What power do you actually have to change how assignments are distributed?", "If you're genuinely committing to bring this to leadership — not just quietly adjusting my load — then yes, I'll help document it. But I need this to become a structural conversation, not just an individual accommodation."]
+  }
+};
+
+// ─── STUDENT RESPONSE OPTIONS ─────────────────────────────────────────────────
+
+const STUDENT_OPTIONS = {
+  Positivism: {
+    supervisor: [[{
+      text: "I have the records here — Alpha was four days late, Q3 two days, client deck three. Let's look at what the data shows before drawing any conclusions.",
+      paradigm: "Positivism"
+    }, {
+      text: "I just want to understand what's been going on for you. Something must be getting in the way.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "The data points to a pattern, but I want to make sure I'm not missing something. Walk me through what was happening during each of those projects.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "Before we talk data, I want to ask — do you feel the system here is set up fairly?",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "Can you walk me through each project specifically? I want to see if there's a documented reason for each delay before I draw any conclusions.",
+      paradigm: "Positivism"
+    }, {
+      text: "I can see there were probably some circumstances outside your control. I don't want to be too rigid about this.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "Before we get into the numbers, I want to check in — what's been going on for you personally these past few weeks?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "That's helpful — but I want to hear from others on the team too before I settle on an explanation.",
+      paradigm: "Post-positivism"
+    }], [{
+      text: "If the scope change is in the log, that's verifiable — I'll check it. For the others, I need something I can actually point to in the record.",
+      paradigm: "Positivism"
+    }, {
+      text: "That makes sense. I trust what you're telling me — scope creep can be really frustrating.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "Competing priorities are real — I'd just like to understand whether my read of the timeline was accurate or if there's context I don't have.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I hear you — and I should be honest that my initial read of this might have been incomplete.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "Right — and that raises a question about whether the way we assign and measure work is fair to begin with.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "Here's what I'm proposing: weekly tracking of on-time delivery, and you flag any scope change within 24 hours so we can document it.",
+      paradigm: "Positivism"
+    }, {
+      text: "What would feel fair to you? I want us to figure this out together.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I want to ask a harder question — is the workload you're carrying comparable to what others in similar roles are expected to deliver?",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I don't want to hand you a plan — let me hear from you about what you think would actually work.",
+      paradigm: "Post-positivism"
+    }], [{
+      text: "Let's agree on the metrics now. I'll document what we've discussed and we review the numbers in four weeks.",
+      paradigm: "Positivism"
+    }, {
+      text: "I think the main thing is just that you feel supported going forward.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "Before I propose any solutions, I want to understand whether our deadline structure is actually equitable — or whether it's set up in a way that makes it harder for some people than others.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I'll commit to reviewing my own role in this before we finalize anything.",
+      paradigm: "Post-positivism"
+    }]],
+    employee: [[{
+      text: "I'm not disputing the missed deadlines — those are facts. But I also have data that provides context. Can I walk you through it?",
+      paradigm: "Positivism"
+    }, {
+      text: "I think my read of the priorities may have been incomplete. Can we look at what information I had at the time versus what you were seeing?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I've been really overwhelmed and I just haven't had the bandwidth to keep up.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I appreciate you asking — but I also want to raise something about whether this workload has been distributed fairly.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "The scope on Alpha expanded 40% mid-project — that's documented in the change log. For Q3, I was simultaneously assigned the client deck. That's two major deliverables in one week.",
+      paradigm: "Positivism"
+    }, {
+      text: "I think part of the issue is that I haven't been feeling very supported recently.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "The real issue isn't my individual performance — it's that the expectations here aren't distributed equitably. I'd like to talk about that.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "Honestly, I don't have a complete explanation — I may have misjudged some things on my end too.",
+      paradigm: "Post-positivism"
+    }], [{
+      text: "Pull the task log — at the time of the Q3 deadline I had 23 open items. Team average was 14. I'm not asking for a pass, I'm asking for the full record to be considered.",
+      paradigm: "Positivism"
+    }, {
+      text: "I want to help you understand what it's actually been like for me — not just what the pattern looks like from the outside.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I feel like the expectations here are just unrealistic for anyone.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I may not have the full picture either — what are you seeing that I might be missing?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I'd want to raise whether peers with different roles or connections face the same scrutiny.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "A tracking system works for me. But I want it to include scope changes and competing assignments — not just delivery dates.",
+      paradigm: "Positivism"
+    }, {
+      text: "I'm open to a plan, but I'd want us to acknowledge that both of us may have been working with incomplete information. Can we build the plan around what we now know?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I just need a lighter workload. That's the real issue here.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I'd want to flag capacity concerns early — but I need to know you'll actually act on them if I do.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "Any plan should account for whether the standard itself is equitable before measuring me against it.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "Agreed. I'll document scope changes the moment they happen and flag any conflicts proactively. I just want the record to reflect the full picture.",
+      paradigm: "Positivism"
+    }, {
+      text: "I appreciate that you're willing to work with me. What I really needed was for someone to ask what was actually going on — and now that you have, I feel like we can actually solve this together.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I want to be transparent about my side of this, and I also need to acknowledge I might be missing something about how my work has been landing. Can we look at this together?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I'll flag things earlier — and I appreciate knowing that you're open to revising your read if new information comes in.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I hope this also leads to a broader conversation about how performance is measured here.",
+      paradigm: "Critical Theory"
+    }]]
+  },
+  "Post-positivism": {
+    supervisor: [[{
+      text: "I've looked at the data, but I want to share my read and then hear yours — because I might be missing something.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "The numbers are pretty clear. Three missed deadlines in a month is a pattern we have to address.",
+      paradigm: "Positivism"
+    }, {
+      text: "I'm not here to judge — I just want you to know this is a safe space to be honest.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I also want to ask — do you feel like the workload distribution here has been fair?",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "That context genuinely changes how I'm reading the Alpha delay. Can you help me understand the other two? I want to revise my picture, not just confirm what I already thought.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I hear you — scope changes are real. What I really want to understand is what that felt like for you when things shifted. Did you feel like you could come to me?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "The scope change aside, the other two delays are still a concern and I need to address them.",
+      paradigm: "Positivism"
+    }, {
+      text: "I appreciate the specifics. Let me also verify the task logs — the record should back that up.",
+      paradigm: "Positivism"
+    }], [{
+      text: "I should be honest — I may have contributed to this by approving overlapping timelines. My read of the situation wasn't complete.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "Before we jump to solutions, I want to make sure I actually understand your experience of these past few weeks. What was the hardest part?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I want to be honest — my read of this situation may have been too narrow. Can you help me see the parts of this I've been missing?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "The documented evidence supports your account — I should have caught that on my end too.",
+      paradigm: "Positivism"
+    }, {
+      text: "I'm thinking about whether the structure that created this situation is the real problem, not your performance.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "I don't want to impose a solution. What do you think is actually driving this — based on your experience of it?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I think a formal improvement plan with clear deadlines is probably the right move here.",
+      paradigm: "Positivism"
+    }, {
+      text: "I just want you to feel better about things. What do you need from me emotionally?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "Let's look at the data together and build a plan we're both confident is grounded in reality.",
+      paradigm: "Positivism"
+    }, {
+      text: "Before we decide on a plan, I want to understand who else is affected by this and how they've experienced it.",
+      paradigm: "Interpretivism"
+    }], [{
+      text: "What if we both take on accountability here — you flag capacity concerns early, and I commit to actually reviewing them before approving new work?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I'll set up weekly check-ins to monitor progress and keep you on track.",
+      paradigm: "Positivism"
+    }, {
+      text: "Before I suggest communication fixes, I want to understand something — did you feel like this was a safe environment to come to me when things got hard?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I'll put this in writing so we're both working from the same documented understanding."
+    }, {
+      text: "I also want to look at whether the system here is creating these conditions for others — not just you."
+    }]],
+    employee: [[{
+      text: "I know the deadlines were missed. I'm not denying that. But I think there's more to the picture, and I want to make sure we're both working from as complete a view as possible.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "The data is clear — I missed the deadlines and I need to own that fully.",
+      paradigm: "Positivism"
+    }, {
+      text: "I've been going through some things personally that made it really hard to keep up.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I also want to raise that the workload distribution across the team hasn't felt equitable.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "On Alpha, the scope expanded significantly mid-project. I should have communicated that impact earlier — I tried to absorb it and probably shouldn't have.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I want to explain what was really happening for me — not as an excuse, but because I think the story is more complicated than the deadline record shows.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "The scope change wasn't my fault — it came from above and I was never given extra time.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "The task log will back this up — I had significantly more open items than the team average during those weeks.",
+      paradigm: "Positivism"
+    }, {
+      text: "I'd also want to question whether peers doing different work face the same scrutiny for similar delays.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "Honestly, I don't have a complete explanation for all three. Some was workload, some was unclear priorities — and I may have made some poor calls about what to handle first.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "The workload was part of it, but honestly it was also the emotional weight of feeling like I was drowning and couldn't tell anyone. That's the part that got me.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I think the expectations in this role are just set too high for anyone to consistently meet.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "There are verifiable factors — scope changes, assignment volume — that I think are part of the story.",
+      paradigm: "Positivism"
+    }, {
+      text: "I also think it's worth examining whether the system here sets some people up to fail more than others.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "I think flagging earlier would help — but I want to ask: if I raised a capacity concern, would you actually be able to act on it? Or would the deadline stay fixed regardless?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I don't want to just commit to working harder — I want us to talk about what actually made this hard, so we're solving the right problem.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "What I really need is for management to set more realistic expectations from the start.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I'd want any plan to be based on the full record — scope changes, task volume, not just output dates.",
+      paradigm: "Positivism"
+    }], [{
+      text: "I'll commit to flagging concerns earlier. I'm not sure I've always felt like that was safe to do — so knowing you'll actually act on it changes things for me.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I really appreciate that you're genuinely listening. Knowing that you care about what I've been going through makes me feel like I can actually tell you the truth.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I need you to understand what was actually happening for me during those weeks before we decide what moving forward looks like.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "Let's document what we've agreed to — and both hold each other accountable to it.",
+      paradigm: "Positivism"
+    }, {
+      text: "I hope this also opens a broader conversation about how performance is measured and who it serves.",
+      paradigm: "Critical Theory"
+    }]]
+  },
+  Interpretivism: {
+    supervisor: [[{
+      text: "Before we get into anything else — how have things actually been for you? I want to understand your experience before I jump to conclusions.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I've reviewed the data and there's a clear pattern. I want to make sure we address it directly.",
+      paradigm: "Positivism"
+    }, {
+      text: "Documentation is part of it, but I want to make sure we're working from a complete picture first. What am I not seeing from my side of this?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I also want to hear from you whether the workload across the team has felt fair.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "I hear you — that sounds genuinely exhausting. What would have helped? What did you actually need that you weren't getting?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I understand it's been a lot. That said, the deadlines do need to be met going forward.",
+      paradigm: "Positivism"
+    }, {
+      text: "Heavy workloads across the team raises a bigger question — is the way I've distributed work here actually equitable, or am I asking more of some people than others?",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I hear you. And I want to check — are there things in the data I should be looking at to better understand the situation?",
+      paradigm: "Post-positivism"
+    }], [{
+      text: "I want you to know the quality of your work hasn't gone unnoticed. I think I've been assuming you'd speak up if something was wrong — how can I make that easier?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I appreciate you sharing that. Let's think about some concrete steps to improve the situation.",
+      paradigm: "Positivism"
+    }, {
+      text: "I've been listening, and I want to check my own understanding — is there something I'm still not seeing about what made this so difficult?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I hear that — and I want to acknowledge that I may have missed signals about how things were going.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I wonder if part of why it felt hard to speak up is that the structure here makes certain voices harder to raise.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "I don't want to hand you a solution. What would actually feel sustainable to you? I want to build this around how you work.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I have some thoughts on a plan, but I want to hold them loosely — I'm probably still missing parts of your experience. What do you think I still don't understand?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "What specific metrics would you commit to hitting over the next month?",
+      paradigm: "Positivism"
+    }, {
+      text: "Let's use the data we have on your situation to figure out what a realistic plan looks like.",
+      paradigm: "Positivism"
+    }], [{
+      text: "Let's not end with me handing you a plan. Can we schedule time this week to actually build something together that fits you?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I'll send you the plan in writing so we have something to work from.",
+      paradigm: "Positivism"
+    }, {
+      text: "Documentation can come later — first I want to examine whether this team's structure is part of what made it so hard for you to meet these expectations.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "Let's document what we've agreed — and be honest about what we're still figuring out.",
+      paradigm: "Post-positivism"
+    }]],
+    employee: [[{
+      text: "Honestly — it's been really overwhelming. I've been running on empty and I didn't feel like I could say anything about it.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I understand the concern. Let me show you the data on what I was actually assigned during those weeks — the numbers tell a different story than just 'missed deadlines.'",
+      paradigm: "Positivism"
+    }, {
+      text: "The workload has been unreasonable. That's the root of it.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I want to be honest — and also flag that the workload hasn't felt equitably distributed.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "The deadlines slipped because I was spread too thin. But more than that — I was hesitant to say anything because I didn't want to look like I couldn't handle it.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "Personal factors aside, I want to show you the documented task load I had during those periods. The numbers support that the workload itself was the core issue.",
+      paradigm: "Positivism"
+    }, {
+      text: "I just need a reduced workload. That's the real solution here.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "There's verifiable context — scope changes, competing assignments — but also something harder to document, which is just how exhausted I've been.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "Part of what made it hard is that I didn't feel like the expectations here were set up to work for someone in my situation.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "What would've helped is just knowing it was okay to say 'this timeline isn't realistic.' I didn't feel like there was space for that conversation.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "Time management isn't really the issue — the data on my task load during those weeks tells a clearer story. Can I show you what I was actually carrying?",
+      paradigm: "Positivism"
+    }, {
+      text: "Honestly, the expectations here aren't set up for anyone to succeed.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I can point to some specific factors — but I also want to be honest that I may have misjudged some things too.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I think the way the team is structured makes it harder for some people to raise problems than others.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "I need clearer signals that it's okay to flag problems without it becoming a performance issue. A check-in where I can raise capacity concerns without it turning into this kind of conversation.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "Adjusting deadlines is one option, but I'd rather show you the data on my actual workload so we can make a decision based on evidence rather than just easing up.",
+      paradigm: "Positivism"
+    }, {
+      text: "Before we talk accommodations, let me show you the workload data. I think the numbers make the case more clearly than a formal process would.",
+      paradigm: "Positivism"
+    }, {
+      text: "I want a plan that comes from an honest conversation — not just something I'm handed and told to follow.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I also want the plan to account for whether the structure here makes this harder for me than for others.",
+      paradigm: "Critical Theory"
+    }], [{
+      text: "I'd really like that. What I've been missing is just feeling like someone cares about what's actually going on for me — not just the output.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I appreciate the conversation, but I want to make sure whatever we agree to is measurable. Can we put specific numbers on the improvement targets so we both know what success looks like?",
+      paradigm: "Positivism"
+    }, {
+      text: "I want to make sure we're both working from an accurate picture here — I think there's context on my end that would change how you see what happened.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I'll commit to flagging things earlier — and I appreciate you being open to the possibility that you might be missing part of the picture.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I hope this conversation leads somewhere — but I've been in situations where nothing structurally changed afterward.",
+      paradigm: "Critical Theory"
+    }]]
+  },
+  "Critical Theory": {
+    supervisor: [[{
+      text: "Before we talk about the missed deadlines — do you feel your workload has been equitable compared to your peers? I want to examine whether our system set you up to fail.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I have the data on the three missed deadlines. I want to understand the root cause.",
+      paradigm: "Positivism"
+    }, {
+      text: "I want to make sure you feel heard before we figure out next steps.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I've been looking at the pattern — and I want to hear your account before I draw any conclusions.",
+      paradigm: "Post-positivism"
+    }], [{
+      text: "If you're consistently carrying more than others, that's not a performance issue — that's a structural one. And I have some responsibility for that.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "That's helpful context. Before we talk about managing it better — I want to understand whether the workload itself is the problem. Is your distribution comparable to your peers?",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I hear that everyone's under pressure — but I want to understand your specific experience, not just compare it to everyone else's. What's been hardest for you?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "The documented evidence supports that — I should have seen it sooner.",
+      paradigm: "Positivism"
+    }], [{
+      text: "Our deadline system may have been designed to serve management more than workers. I've been enforcing a standard that may not be fair to apply uniformly.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "Adjustments are important, but before we get there — I want to really understand your experience. What has this period actually been like for you day to day?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "The standards exist for good reasons — the team depends on everyone pulling their weight.",
+      paradigm: "Positivism"
+    }, {
+      text: "I want to look at the actual data before I accept or reject that explanation.",
+      paradigm: "Positivism"
+    }], [{
+      text: "I want to do more than fix your individual situation. Would you be willing to help me document the inequity so I can bring it to leadership?",
+      paradigm: "Critical Theory"
+    }, {
+      text: "Adjusting deadlines feels right, but I want to make sure I'm not just patching over something I don't fully understand yet. What's the part of this I'm probably still missing?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "Before we build a plan, I want to acknowledge I may not have the full picture. What would you want me to understand about your situation before we decide on next steps?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "Let's build a plan based on the actual evidence — and make sure it accounts for what the record shows.",
+      paradigm: "Positivism"
+    }], [{
+      text: "I'm bringing the workload distribution data to the team leads meeting. I can't promise overnight change — but I'm committing to making the systemic problem visible.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "Let me pull up the workload distribution numbers for the team — if there's an equity issue here, I want to see it in the data before we decide on next steps.",
+      paradigm: "Positivism"
+    }, {
+      text: "A plan matters, but I want to make sure it's built on real understanding — not just a checklist. What do you need from me to feel like this plan will actually work for you?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I'll document this and follow up — and I'll be honest about where my initial read was incomplete.",
+      paradigm: "Post-positivism"
+    }]],
+    employee: [[{
+      text: "Since you're asking directly — no, it hasn't felt equitable. I've been carrying more than some peers, and that's part of why the deadlines slipped.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I want to take responsibility, and I also want to make sure we're working from a complete picture. Can I share what things looked like from my side during those weeks?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I don't think organization is really the issue — I think we may both be missing part of the picture. Can I walk you through what I was actually navigating?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I want to be honest — and I also have data that provides context for what happened.",
+      paradigm: "Positivism"
+    }], [{
+      text: "It's not just the volume — the types of projects I get are more complex but measured against the same standards as simpler tasks. That's not a level playing field.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "The workload was heavy — but I'm not sure 'I should have managed better' is the full story. I'd like us to look at what was actually on my plate and whether those expectations were reasonable.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I've just been really stressed and it's affecting my work.",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I can show you the task log — the numbers support what I'm saying.",
+      paradigm: "Positivism"
+    }], [{
+      text: "I raised this informally before and nothing changed. I wasn't sure whether flagging it would just make me look like I was complaining.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "Speaking up is part of it, but I also want to show you the data on what I was carrying. The numbers make the equity issue concrete — I don't want to just assert it.",
+      paradigm: "Positivism"
+    }, {
+      text: "I don't want to cause problems, but I do need to feel heard before I can commit to any plan. Can you help me understand what you think I've been going through?",
+      paradigm: "Interpretivism"
+    }, {
+      text: "I want to be honest that I may not have the full picture either — I don't always know what others are carrying.",
+      paradigm: "Post-positivism"
+    }], [{
+      text: "What power do you actually have to change how assignments are distributed? I've had this conversation before and the structure never changes.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "A workload adjustment makes sense, but I want to make sure we're calibrating it to the actual picture — can we look at what I was carrying before we decide on numbers?",
+      paradigm: "Post-positivism"
+    }, {
+      text: "More time might help, but I'm not sure that's the whole story. I'd rather we look at the full context together before assuming that's the fix.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I'd want any plan to be based on what the actual data shows — not just what seems reasonable.",
+      paradigm: "Positivism"
+    }], [{
+      text: "If this becomes a structural conversation — not just an individual accommodation — then yes, I'll help document it. But I'm not going to flag my situation if it just protects me while the problem continues for others.",
+      paradigm: "Critical Theory"
+    }, {
+      text: "I appreciate the conversation. Going forward, I'd like us to track workload and deadlines with actual data so we have a clear record if this comes up again.",
+      paradigm: "Positivism"
+    }, {
+      text: "I want to make sure any documentation reflects the full picture — including the task load data I have from those weeks. The record should be accurate, not just one-sided.",
+      paradigm: "Positivism"
+    }, {
+      text: "I'll engage with this — and I appreciate that you're open to the possibility that your original read was incomplete.",
+      paradigm: "Post-positivism"
+    }, {
+      text: "I hope this leads to something real — not just a conversation that makes things look better without changing them.",
+      paradigm: "Critical Theory"
+    }]]
+  }
+};
+function getAIResponse(paradigm, role, turnIndex) {
+  const lines = AI_SCRIPTS[paradigm]?.[role];
+  if (!lines) return "...";
+  return lines[Math.min(turnIndex, lines.length - 1)];
+}
+function getStudentOptions(paradigm, role, turnIndex) {
+  const opts = STUDENT_OPTIONS[paradigm]?.[role]?.[turnIndex];
+  if (!opts) return [];
+  return [...opts].sort(() => Math.random() - 0.5);
+}
+
+// ─── STAGES ───────────────────────────────────────────────────────────────────
+
+const STAGES = ["assessment", "reference", "roleplay", "summary"];
+const stageLabels = ["🧭 Assessment", "📖 Reference", "🎭 Role-Play", "📋 Summary"]; // eference", "🎭 Role-Play", "💭 Reflection", "✏️ Exit Ticket"];
+
+function ProgressBar({
+  stage
+}) {
+  const idx = STAGES.indexOf(stage);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      padding: "10px 16px",
+      borderBottom: "1px solid rgba(255,255,255,0.08)"
+    }
+  }, STAGES.map((s, i) => /*#__PURE__*/React.createElement("div", {
+    key: s,
+    style: {
+      flex: 1,
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 3,
+      borderRadius: 2,
+      marginBottom: 4,
+      background: i <= idx ? "#D4A017" : "rgba(255,255,255,0.15)"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      fontFamily: "monospace",
+      color: i === idx ? "#D4A017" : i < idx ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.2)",
+      fontWeight: i === idx ? "bold" : "normal"
+    }
+  }, stageLabels[i]))));
+}
+
+// ─── STAGE 0: PARADIGM ASSESSMENT ────────────────────────────────────────────
+
+function AssessmentStage({
+  onComplete
+}) {
+  const [questions] = useState(() => ASSESSMENT_QUESTIONS.map(q => ({
+    ...q,
+    options: [...q.options].sort(() => Math.random() - 0.5)
+  })));
+  const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState(null);
+  const topRef = useRef(null);
+  const answered = Object.keys(answers).length;
+  const allAnswered = answered === questions.length;
+  function submit() {
+    const answerList = questions.map((_, i) => answers[i]);
+    const r = scoreAssessment(answerList);
+    setResult(r);
+    setSubmitted(true);
+    setTimeout(() => topRef.current?.scrollIntoView({
+      behavior: "smooth"
+    }), 50);
+  }
+  if (submitted && result) {
+    const primary = PARADIGMS[result.primary];
+    const secondary = PARADIGMS[result.secondary];
+    const total = questions.length;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "24px 20px",
+        maxWidth: 680,
+        margin: "0 auto"
+      },
+      ref: topRef
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 24
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#D4A017",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 8
+      }
+    }, "YOUR PARADIGM PROFILE"), /*#__PURE__*/React.createElement("h2", {
+      style: {
+        margin: 0,
+        fontSize: 26,
+        fontWeight: "bold",
+        color: "white",
+        fontFamily: "Georgia, serif"
+      }
+    }, "Here's how you see the world"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "8px 0 0",
+        fontSize: 14,
+        color: "rgba(255,255,255,0.55)",
+        fontStyle: "italic",
+        fontFamily: "Georgia, serif"
+      }
+    }, "Based on your 10 responses. This is a starting point \u2014 not a box.")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        borderRadius: 16,
+        overflow: "hidden",
+        marginBottom: 16,
+        border: `2px solid ${primary.color}`
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: primary.color,
+        padding: "16px 20px",
+        display: "flex",
+        alignItems: "center",
+        gap: 14
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 32
+      }
+    }, primary.emoji), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "rgba(255,255,255,0.7)",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 2
+      }
+    }, "PRIMARY PARADIGM \xB7 ", result.scores[result.primary], "/", total), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "white",
+        fontFamily: "Georgia, serif"
+      }
+    }, result.primary), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        color: "rgba(255,255,255,0.8)",
+        fontStyle: "italic",
+        fontFamily: "Georgia, serif"
+      }
+    }, primary.tagline))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "14px 20px",
+        background: "rgba(255,255,255,0.04)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr 1fr",
+        gap: 10
+      }
+    }, [{
+      label: "WHAT IS REAL?",
+      text: primary.ont
+    }, {
+      label: "HOW DO WE KNOW?",
+      text: primary.epist
+    }, {
+      label: "WHAT MATTERS?",
+      text: primary.axio
+    }].map(f => /*#__PURE__*/React.createElement("div", {
+      key: f.label
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: primary.color,
+        fontFamily: "monospace",
+        letterSpacing: 1,
+        marginBottom: 4
+      }
+    }, f.label), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "rgba(255,255,255,0.7)",
+        lineHeight: 1.5
+      }
+    }, f.text)))))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        borderRadius: 12,
+        overflow: "hidden",
+        marginBottom: 20,
+        border: `1px solid ${secondary.color}77`
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: `${secondary.color}33`,
+        padding: "12px 20px",
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 24
+      }
+    }, secondary.emoji), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: secondary.color,
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 2
+      }
+    }, "SECONDARY PARADIGM \xB7 ", result.scores[result.secondary], "/", total), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "white",
+        fontFamily: "Georgia, serif"
+      }
+    }, result.secondary), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "rgba(255,255,255,0.7)",
+        fontStyle: "italic"
+      }
+    }, secondary.tagline)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(255,255,255,0.04)",
+        borderRadius: 12,
+        padding: "14px 16px",
+        marginBottom: 24
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "rgba(255,255,255,0.4)",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 10
+      }
+    }, "ALL PARADIGM SCORES"), PARADIGM_NAMES.map(name => {
+      const pp = PARADIGMS[name];
+      const score = result.scores[name];
+      const pct = score / total * 100;
+      return /*#__PURE__*/React.createElement("div", {
+        key: name,
+        style: {
+          marginBottom: 8
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 3
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 12,
+          color: "rgba(255,255,255,0.7)",
+          fontFamily: "Georgia, serif"
+        }
+      }, pp.emoji, " ", name), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 12,
+          color: pp.color,
+          fontFamily: "monospace"
+        }
+      }, score, "/", total)), /*#__PURE__*/React.createElement("div", {
+        style: {
+          height: 6,
+          background: "rgba(255,255,255,0.08)",
+          borderRadius: 3
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          height: "100%",
+          width: `${pct}%`,
+          background: pp.color,
+          borderRadius: 3,
+          transition: "width 0.6s ease"
+        }
+      })));
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(212,160,23,0.1)",
+        border: "1px solid rgba(212,160,23,0.35)",
+        borderRadius: 12,
+        padding: "14px 18px",
+        marginBottom: 24
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#D4A017",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 6
+      }
+    }, "WHAT THIS MEANS FOR THE ROLE-PLAY"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 13,
+        color: "rgba(255,255,255,0.8)",
+        lineHeight: 1.7,
+        fontFamily: "Georgia, serif"
+      }
+    }, "In the role-play, you'll choose your role and confirm which paradigm you want to use \u2014 your results here are a guide, not a requirement. The other character will always use a ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "#D4A017"
+      }
+    }, "different paradigm"), ". Your job is to stay in your lens and figure out theirs.")), /*#__PURE__*/React.createElement("button", {
+      onClick: () => onComplete(result),
+      style: {
+        width: "100%",
+        padding: "16px",
+        background: `linear-gradient(135deg, ${primary.color}, ${secondary.color})`,
+        color: "white",
+        border: "none",
+        borderRadius: 12,
+        fontSize: 15,
+        fontFamily: "Georgia, serif",
+        cursor: "pointer"
+      }
+    }, "Continue to Reference Card \u2192"));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "24px 20px",
+      maxWidth: 680,
+      margin: "0 auto"
+    },
+    ref: topRef
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#D4A017",
+      fontFamily: "monospace",
+      letterSpacing: 2,
+      marginBottom: 8
+    }
+  }, "STAGE 1 OF 5"), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: 0,
+      fontSize: 26,
+      fontWeight: "bold",
+      color: "white",
+      fontFamily: "Georgia, serif"
+    }
+  }, "Paradigm Self-Assessment"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "8px 0 0",
+      fontSize: 14,
+      color: "rgba(255,255,255,0.55)",
+      fontStyle: "italic",
+      fontFamily: "Georgia, serif"
+    }
+  }, "10 questions. For each one, choose the response that sounds most like how you actually think \u2014 not the one that sounds right. There are no wrong answers.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(255,255,255,0.05)",
+      borderRadius: 8,
+      padding: "10px 14px",
+      marginBottom: 24,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: "rgba(255,255,255,0.5)",
+      fontFamily: "monospace"
+    }
+  }, answered, " of ", questions.length, " answered"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      margin: "0 12px",
+      height: 4,
+      background: "rgba(255,255,255,0.1)",
+      borderRadius: 2
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: "100%",
+      width: `${answered / questions.length * 100}%`,
+      background: "#D4A017",
+      borderRadius: 2,
+      transition: "width 0.3s"
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: allAnswered ? "#D4A017" : "rgba(255,255,255,0.3)",
+      fontFamily: "monospace"
+    }
+  }, allAnswered ? "✓ Done" : `${questions.length - answered} left`)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 20,
+      marginBottom: 28
+    }
+  }, questions.map((q, qi) => /*#__PURE__*/React.createElement("div", {
+    key: qi,
+    style: {
+      background: "rgba(255,255,255,0.04)",
+      borderRadius: 14,
+      overflow: "hidden",
+      border: `1px solid ${answers[qi] ? `${PARADIGMS[answers[qi]].color}55` : "rgba(255,255,255,0.08)"}`,
+      transition: "border-color 0.2s"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: "1px solid rgba(255,255,255,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "rgba(255,255,255,0.35)",
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 6
+    }
+  }, "QUESTION ", qi + 1, " OF ", questions.length), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 14,
+      color: "rgba(255,255,255,0.9)",
+      fontFamily: "Georgia, serif",
+      lineHeight: 1.6
+    }
+  }, q.prompt)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 12px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 6
+    }
+  }, q.options.map((opt, oi) => {
+    const isSelected = answers[qi] === opt.paradigm;
+    const pp = PARADIGMS[opt.paradigm];
+    return /*#__PURE__*/React.createElement("button", {
+      key: oi,
+      onClick: () => setAnswers({
+        ...answers,
+        [qi]: opt.paradigm
+      }),
+      style: {
+        padding: "11px 14px",
+        textAlign: "left",
+        borderRadius: 8,
+        background: isSelected ? `${pp.color}33` : "rgba(255,255,255,0.03)",
+        border: `1.5px solid ${isSelected ? pp.color : "rgba(255,255,255,0.08)"}`,
+        color: isSelected ? "white" : "rgba(255,255,255,0.7)",
+        cursor: "pointer",
+        fontSize: 13,
+        fontFamily: "Georgia, serif",
+        lineHeight: 1.55,
+        transition: "all 0.15s",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 10
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        flexShrink: 0,
+        width: 20,
+        height: 20,
+        borderRadius: "50%",
+        background: isSelected ? pp.color : "rgba(255,255,255,0.1)",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 10,
+        marginTop: 1,
+        fontFamily: "monospace"
+      }
+    }, isSelected ? "✓" : ["A", "B", "C", "D", "E"][oi]), /*#__PURE__*/React.createElement("span", null, opt.text));
+  }))))), /*#__PURE__*/React.createElement("button", {
+    onClick: submit,
+    disabled: !allAnswered,
+    style: {
+      width: "100%",
+      padding: "16px",
+      background: allAnswered ? "linear-gradient(135deg, #1B4F8A, #9D174D)" : "rgba(255,255,255,0.08)",
+      color: allAnswered ? "white" : "rgba(255,255,255,0.3)",
+      border: "none",
+      borderRadius: 12,
+      fontSize: 15,
+      fontFamily: "Georgia, serif",
+      cursor: allAnswered ? "pointer" : "not-allowed"
+    }
+  }, "See My Paradigm Profile \u2192"), !allAnswered && /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      fontSize: 12,
+      color: "rgba(255,255,255,0.3)",
+      marginTop: 8
+    }
+  }, "Answer all ", questions.length, " questions to continue"));
+}
+
+// ─── STAGE 1: REFERENCE ───────────────────────────────────────────────────────
+
+function ReferenceCard({
+  assessmentResult,
+  onNext
+}) {
+  const [expanded, setExpanded] = useState(null);
+  const primary = assessmentResult?.primary;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "24px 20px",
+      maxWidth: 680,
+      margin: "0 auto"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#D4A017",
+      fontFamily: "monospace",
+      letterSpacing: 2,
+      marginBottom: 8
+    }
+  }, "STAGE 2 OF 5"), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: 0,
+      fontSize: 26,
+      fontWeight: "bold",
+      color: "white",
+      fontFamily: "Georgia, serif"
+    }
+  }, "Paradigm Reference Card"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "8px 0 0",
+      fontSize: 14,
+      color: "rgba(255,255,255,0.55)",
+      fontFamily: "Georgia, serif",
+      fontStyle: "italic"
+    }
+  }, "Read this before the role-play. Tap any paradigm to expand it.")), primary && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: `${PARADIGMS[primary].color}22`,
+      border: `1px solid ${PARADIGMS[primary].color}55`,
+      borderRadius: 10,
+      padding: "10px 14px",
+      marginBottom: 16,
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18
+    }
+  }, PARADIGMS[primary].emoji), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 13,
+      color: "rgba(255,255,255,0.8)",
+      fontFamily: "Georgia, serif"
+    }
+  }, "Your primary paradigm is ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: PARADIGMS[primary].color
+    }
+  }, primary), " \u2014 find it below and read it carefully. This is the lens you'll use in the role-play.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(212,160,23,0.1)",
+      border: "1px solid rgba(212,160,23,0.4)",
+      borderRadius: 12,
+      padding: "16px 20px",
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#D4A017",
+      fontFamily: "monospace",
+      letterSpacing: 2,
+      marginBottom: 8
+    }
+  }, "THE SCENARIO"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 14,
+      color: "rgba(255,255,255,0.85)",
+      fontFamily: "Georgia, serif",
+      fontStyle: "italic",
+      lineHeight: 1.6
+    }
+  }, SCENARIO)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr",
+      gap: 8,
+      marginBottom: 20
+    }
+  }, [{
+    label: "WHAT IS REAL?",
+    q: "Ontology",
+    body: "Does one objective truth exist, or does reality depend on who's looking and what they've experienced?"
+  }, {
+    label: "HOW DO WE KNOW?",
+    q: "Epistemology",
+    body: "What counts as real evidence — hard data, multiple perspectives, personal stories, or exposing who holds power?"
+  }, {
+    label: "WHAT MATTERS?",
+    q: "Axiology",
+    body: "Do our values shape what we see and what we decide? Or can we set them aside and stay neutral?"
+  }].map(f => /*#__PURE__*/React.createElement("div", {
+    key: f.label,
+    style: {
+      background: "rgba(255,255,255,0.05)",
+      borderRadius: 10,
+      padding: "12px 14px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "#D4A017",
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 4
+    }
+  }, f.label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "white",
+      fontWeight: "bold",
+      marginBottom: 4,
+      fontFamily: "Georgia, serif"
+    }
+  }, f.q), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "rgba(255,255,255,0.55)",
+      lineHeight: 1.5
+    }
+  }, f.body)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+      marginBottom: 24
+    }
+  }, PARADIGM_NAMES.map(name => {
+    const p = PARADIGMS[name];
+    const isOpen = expanded === name;
+    const isPrimary = name === primary;
+    return /*#__PURE__*/React.createElement("div", {
+      key: name,
+      style: {
+        borderRadius: 12,
+        overflow: "hidden",
+        border: `${isPrimary ? 2 : 1}px solid ${p.color}${isPrimary ? "cc" : "55"}`
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => setExpanded(isOpen ? null : name),
+      style: {
+        width: "100%",
+        textAlign: "left",
+        padding: "14px 16px",
+        background: isOpen ? p.color : isPrimary ? `${p.color}22` : "rgba(255,255,255,0.04)",
+        border: "none",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 22
+      }
+    }, p.emoji), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 14,
+        color: "white",
+        fontWeight: "bold",
+        fontFamily: "Georgia, serif"
+      }
+    }, name), isPrimary && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        background: p.color,
+        color: "white",
+        padding: "2px 7px",
+        borderRadius: 10,
+        fontFamily: "monospace"
+      }
+    }, "YOUR PRIMARY")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: isOpen ? "rgba(255,255,255,0.8)" : p.color,
+        fontStyle: "italic",
+        fontFamily: "Georgia, serif"
+      }
+    }, p.tagline)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "rgba(255,255,255,0.4)"
+      }
+    }, isOpen ? "▲" : "▼")), isOpen && /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "16px",
+        background: "rgba(255,255,255,0.03)",
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr 1fr",
+        gap: 10
+      }
+    }, [{
+      label: "WHAT IS REAL?",
+      text: p.ont
+    }, {
+      label: "HOW DO WE KNOW?",
+      text: p.epist
+    }, {
+      label: "WHAT MATTERS?",
+      text: p.axio
+    }].map(f => /*#__PURE__*/React.createElement("div", {
+      key: f.label
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: p.color,
+        fontFamily: "monospace",
+        letterSpacing: 1,
+        marginBottom: 4
+      }
+    }, f.label), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "rgba(255,255,255,0.75)",
+        lineHeight: 1.55
+      }
+    }, f.text)))));
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: onNext,
+    style: {
+      width: "100%",
+      padding: "16px",
+      background: "linear-gradient(135deg, #1B4F8A, #5B3A8A)",
+      color: "white",
+      border: "none",
+      borderRadius: 12,
+      fontSize: 15,
+      fontFamily: "Georgia, serif",
+      cursor: "pointer"
+    }
+  }, "I'm ready for the Role-Play \u2192"));
+}
+
+// ─── STAGE 2: ROLE-PLAY ───────────────────────────────────────────────────────
+
+// ─── PARADIGM MISMATCH EXPLANATIONS ──────────────────────────────────────────
+// Explains why choosing paradigm B when you should be in paradigm A is wrong.
+// Key: "StudentParadigm → ChosenParadigm"
+
+const MISMATCH_EXPLANATIONS = {
+  "Positivism → Interpretivism": {
+    why: "That response leads with empathy and lived experience — Interpretivism asks 'how does this feel?' before looking at facts. A Positivist stays focused on observable, measurable data.",
+    howToFix: "Keep it factual. Reference records, timelines, and documented evidence. Don't ask about feelings or create emotional space — that's not what this paradigm does."
+  },
+  "Positivism → Post-positivism": {
+    why: "That response acknowledges uncertainty or invites multiple perspectives — that's Post-positivism, which holds knowledge humbly. Positivism treats data as the authoritative truth, not one perspective among many.",
+    howToFix: "State what the data shows directly and confidently. Don't hedge or invite a 'revision' of your read — the record is the record."
+  },
+  "Positivism → Critical Theory": {
+    why: "That response questions the system, power dynamics, or whether the rules are fair — that's Critical Theory. A Positivist doesn't interrogate the framework; they apply it consistently and let data speak.",
+    howToFix: "Stay neutral and apply the standard consistently. The question isn't whether the system is fair — it's whether the performance data shows compliance with it."
+  },
+  "Post-positivism → Positivism": {
+    why: "That response treats the data as final and definitive — that's Positivism. Post-positivism acknowledges that even good evidence can be incomplete or biased.",
+    howToFix: "Hold your conclusions more loosely. Share what you've observed, but frame it as your current read — and stay genuinely open to revising it."
+  },
+  "Post-positivism → Interpretivism": {
+    why: "That response prioritizes emotional experience and relationship over evidence — that's Interpretivism. Post-positivism still uses evidence; it just holds it with epistemic humility.",
+    howToFix: "Keep evidence in the conversation, but acknowledge you might be missing something. You're not abandoning data — you're being honest about its limits."
+  },
+  "Post-positivism → Critical Theory": {
+    why: "That response focuses on power imbalance or systemic injustice — that's Critical Theory. Post-positivism is about refining knowledge, not exposing who benefits from it.",
+    howToFix: "Stay in an evidence-gathering mode. Your skepticism should be about whether you have the full picture — not about who the system was designed to serve."
+  },
+  "Interpretivism → Positivism": {
+    why: "That response turns to data and documentation — that's Positivism. Interpretivism believes meaning comes from lived experience, not from metrics.",
+    howToFix: "Put down the numbers and open a conversation. Ask open-ended questions. Listen more than you speak. Human experience is your evidence."
+  },
+  "Interpretivism → Post-positivism": {
+    why: "That response acknowledges uncertainty and looks for multiple data sources — that's Post-positivism. Interpretivism isn't about triangulating evidence; it's about deeply understanding one person's experience.",
+    howToFix: "Focus on understanding this person's specific story. You're not looking for corroboration — you're trying to understand their world from the inside."
+  },
+  "Interpretivism → Critical Theory": {
+    why: "That response names power structures or systemic inequity — that's Critical Theory. Interpretivism focuses on individual lived experience, not structural analysis.",
+    howToFix: "Stay in the personal, relational space. What is this person experiencing? What does this situation mean to them? Don't shift into systemic analysis."
+  },
+  "Critical Theory → Positivism": {
+    why: "That response accepts the performance metrics as neutral and authoritative — that's Positivism. Critical Theory always asks: who designed these standards, and who do they serve?",
+    howToFix: "Question the framework before applying it. Don't treat 'missed deadline' as a neutral fact — examine the power structure that produced that standard."
+  },
+  "Critical Theory → Post-positivism": {
+    why: "That response is about acknowledging uncertainty or gathering more evidence — that's Post-positivism. Critical Theory is about exposing systemic inequity, not improving epistemic rigor.",
+    howToFix: "Name the structural issue directly. Who has power here? Who is disadvantaged by the current system? Don't hedge — commit to the analysis."
+  },
+  "Critical Theory → Interpretivism": {
+    why: "That response centers individual feelings and personal experience — that's Interpretivism. Critical Theory is concerned with structures and systems, not individual emotional narratives.",
+    howToFix: "Move from the personal to the structural. The individual's experience matters — but what it reveals about the system is the point."
+  }
+};
+function getCorrectOption(paradigm, role, turnIndex) {
+  const opts = STUDENT_OPTIONS[paradigm]?.[role]?.[turnIndex];
+  if (!opts) return null;
+  return opts.find(o => o.paradigm === paradigm) || opts[0];
+}
+function RolePlaySimulator({
+  assessmentResult,
+  onNext
+}) {
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedParadigm, setSelectedParadigm] = useState(assessmentResult?.primary || null);
+  const [selectionStep, setSelectionStep] = useState("role");
+  const [aiParadigm, setAiParadigm] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [turnCount, setTurnCount] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [guessMode, setGuessMode] = useState(false);
+  const [guess, setGuess] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [currentOptions, setCurrentOptions] = useState([]);
+  const [waitingForChoice, setWaitingForChoice] = useState(false);
+  const [wrongFeedback, setWrongFeedback] = useState(null);
+  const [rightFeedback, setRightFeedback] = useState(null);
+  const [hadWrongAnswer, setHadWrongAnswer] = useState(false);
+  const [choiceLog, setChoiceLog] = useState([]); // { turn, chosenText, chosenParadigm, wasWrong, finalText }
+  const bottomRef = useRef(null);
+  const maxTurns = 5;
+  const oppositeRole = selectedRole === "supervisor" ? "employee" : "supervisor";
+  const p = selectedParadigm ? PARADIGMS[selectedParadigm] : null;
+  const card = p && selectedRole ? selectedRole === "supervisor" ? p.supervisorCard : p.employeeCard : null;
+  const roleLabel = selectedRole === "supervisor" ? "Supervisor" : "Jordan (Employee)";
+  const aiLabel = oppositeRole === "supervisor" ? "Supervisor" : "Jordan (Employee)";
+  useEffect(() => {
+    if (bottomRef.current) bottomRef.current.scrollIntoView({
+      behavior: "smooth"
+    });
+  }, [messages, typing, waitingForChoice, wrongFeedback]);
+  function confirmSelections() {
+    setAiParadigm(pickDifferentParadigm(selectedParadigm));
+    setSelectionStep("ready");
+  }
+  function startConversation() {
+    setSelectionStep("chat");
+    setTyping(true);
+    setTimeout(() => {
+      setMessages([{
+        role: "ai",
+        text: getAIResponse(aiParadigm, oppositeRole, 0)
+      }]);
+      setTyping(false);
+      setCurrentOptions(getStudentOptions(selectedParadigm, selectedRole, 0));
+      setWaitingForChoice(true);
+    }, 900);
+  }
+  function chooseOption(option) {
+    if (!waitingForChoice || typing) return;
+    const isCorrect = option.paradigm === selectedParadigm;
+    if (!isCorrect) {
+      // Wrong answer — show why it's wrong, force re-pick
+      const key = `${selectedParadigm} → ${option.paradigm || "None"}`;
+      const explanation = MISMATCH_EXPLANATIONS[key] || {
+        why: `That response sounds more like ${option.paradigm || "a different approach"} than ${selectedParadigm}.`,
+        howToFix: `Bring the response back to the core logic of ${selectedParadigm}.`
+      };
+      setWrongFeedback({
+        chosenText: option.text,
+        chosenParadigm: option.paradigm || "None",
+        explanation,
+        turnIndex: turnCount
+      });
+      // Log wrong attempt (will be updated when they get it right)
+      setChoiceLog(prev => {
+        const updated = [...prev];
+        const existing = updated.find(c => c.turn === turnCount + 1);
+        if (!existing) updated.push({
+          turn: turnCount + 1,
+          wrongAttempts: [{
+            text: option.text,
+            paradigm: option.paradigm || "None"
+          }],
+          finalText: null,
+          finalParadigm: null,
+          wasWrong: true
+        });else existing.wrongAttempts = [...(existing.wrongAttempts || []), {
+          text: option.text,
+          paradigm: option.paradigm || "None"
+        }];
+        return updated;
+      });
+      setHadWrongAnswer(true);
+      return;
+    }
+    // Correct answer
+    if (hadWrongAnswer) {
+      // They got it wrong before — show why this one is right before advancing
+      const key = `${selectedParadigm} → correct`;
+      setChoiceLog(prev => {
+        const updated = [...prev];
+        const existing = updated.find(c => c.turn === turnCount + 1);
+        if (existing) {
+          existing.finalText = option.text;
+          existing.finalParadigm = selectedParadigm;
+        } else updated.push({
+          turn: turnCount + 1,
+          wrongAttempts: [],
+          finalText: option.text,
+          finalParadigm: selectedParadigm,
+          wasWrong: true
+        });
+        return updated;
+      });
+      setRightFeedback({
+        chosenText: option.text,
+        paradigm: selectedParadigm,
+        pendingAdvance: option.text
+      });
+      setHadWrongAnswer(false);
+      setWrongFeedback(null);
+      setWaitingForChoice(false);
+      setCurrentOptions([]);
+    } else {
+      // First-try correct — log it
+      setChoiceLog(prev => [...prev, {
+        turn: turnCount + 1,
+        wrongAttempts: [],
+        finalText: option.text,
+        finalParadigm: selectedParadigm,
+        wasWrong: false
+      }]);
+      advanceTurn(option.text);
+    }
+  }
+  function advanceTurn(responseText) {
+    setWrongFeedback(null);
+    setRightFeedback(null);
+    setWaitingForChoice(false);
+    setCurrentOptions([]);
+    const newTurn = turnCount + 1;
+    setTurnCount(newTurn);
+    const newMessages = [...messages, {
+      role: "user",
+      text: responseText
+    }];
+    setMessages(newMessages);
+    if (newTurn >= maxTurns) {
+      setFinished(true);
+    } else {
+      setTyping(true);
+      setTimeout(() => {
+        const updated = [...newMessages, {
+          role: "ai",
+          text: getAIResponse(aiParadigm, oppositeRole, newTurn)
+        }];
+        setMessages(updated);
+        setTyping(false);
+        setCurrentOptions(getStudentOptions(selectedParadigm, selectedRole, newTurn));
+        setWaitingForChoice(true);
+      }, 900 + Math.random() * 400);
+    }
+  }
+
+  // Role selection
+  if (selectionStep === "role") {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "24px 20px",
+        maxWidth: 680,
+        margin: "0 auto",
+        overflowY: "auto",
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 24
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#D4A017",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 8
+      }
+    }, "STAGE 3 OF 5 \xB7 STEP 1 OF 2"), /*#__PURE__*/React.createElement("h2", {
+      style: {
+        margin: 0,
+        fontSize: 26,
+        fontWeight: "bold",
+        color: "white",
+        fontFamily: "Georgia, serif"
+      }
+    }, "Who are you in this conversation?"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "8px 0 16px",
+        fontSize: 14,
+        color: "rgba(255,255,255,0.55)",
+        fontFamily: "Georgia, serif",
+        fontStyle: "italic"
+      }
+    }, "Choose your role. The other character will use a ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "#D4A017"
+      }
+    }, "different paradigm"), " than the one you'll confirm next.")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(212,160,23,0.08)",
+        border: "1px solid rgba(212,160,23,0.3)",
+        borderRadius: 10,
+        padding: "12px 16px",
+        marginBottom: 24
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "#D4A017",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 6
+      }
+    }, "THE SCENARIO"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 13,
+        color: "rgba(255,255,255,0.75)",
+        fontStyle: "italic",
+        fontFamily: "Georgia, serif",
+        lineHeight: 1.6
+      }
+    }, SCENARIO)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        marginBottom: 24
+      }
+    }, [{
+      value: "supervisor",
+      label: "Supervisor",
+      desc: "You called this meeting to address Jordan's missed deadlines.",
+      emoji: "🏢"
+    }, {
+      value: "employee",
+      label: "Jordan (Employee)",
+      desc: "Your supervisor has called you in to discuss your recent performance.",
+      emoji: "💼"
+    }].map(opt => /*#__PURE__*/React.createElement("button", {
+      key: opt.value,
+      onClick: () => setSelectedRole(opt.value),
+      style: {
+        padding: "18px 20px",
+        textAlign: "left",
+        borderRadius: 14,
+        background: selectedRole === opt.value ? "rgba(212,160,23,0.2)" : "rgba(255,255,255,0.05)",
+        border: `2px solid ${selectedRole === opt.value ? "#D4A017" : "rgba(255,255,255,0.1)"}`,
+        color: "white",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 14
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 32,
+        flexShrink: 0
+      }
+    }, opt.emoji), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 16,
+        fontWeight: "bold",
+        fontFamily: "Georgia, serif",
+        marginBottom: 4,
+        color: selectedRole === opt.value ? "#D4A017" : "white"
+      }
+    }, opt.label), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        color: "rgba(255,255,255,0.6)",
+        lineHeight: 1.5
+      }
+    }, opt.desc)), selectedRole === opt.value && /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "#D4A017",
+        fontSize: 20
+      }
+    }, "\u2713")))), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        if (selectedRole) setSelectionStep("paradigm");
+      },
+      disabled: !selectedRole,
+      style: {
+        width: "100%",
+        padding: "16px",
+        background: selectedRole ? "linear-gradient(135deg, #1B4F8A, #5B3A8A)" : "rgba(255,255,255,0.08)",
+        color: selectedRole ? "white" : "rgba(255,255,255,0.3)",
+        border: "none",
+        borderRadius: 12,
+        fontSize: 15,
+        fontFamily: "Georgia, serif",
+        cursor: selectedRole ? "pointer" : "not-allowed"
+      }
+    }, "Next: Confirm Your Paradigm \u2192"));
+  }
+
+  // Paradigm selection
+  if (selectionStep === "paradigm") {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "24px 20px",
+        maxWidth: 680,
+        margin: "0 auto",
+        overflowY: "auto",
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 20
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#D4A017",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 8
+      }
+    }, "STAGE 3 OF 5 \xB7 STEP 2 OF 2"), /*#__PURE__*/React.createElement("h2", {
+      style: {
+        margin: 0,
+        fontSize: 26,
+        fontWeight: "bold",
+        color: "white",
+        fontFamily: "Georgia, serif"
+      }
+    }, "Confirm your paradigm"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "8px 0 16px",
+        fontSize: 14,
+        color: "rgba(255,255,255,0.55)",
+        fontFamily: "Georgia, serif",
+        fontStyle: "italic"
+      }
+    }, "Your assessment suggests ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: assessmentResult ? PARADIGMS[assessmentResult.primary].color : "white"
+      }
+    }, assessmentResult?.primary), " as your primary lens. You can use it or choose a different one \u2014 but once you confirm, ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "#D4A017"
+      }
+    }, "stay in that paradigm for the entire conversation."), " Resist the urge to respond any other way, even when it feels unnatural.")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(212,160,23,0.08)",
+        border: "1px solid rgba(212,160,23,0.35)",
+        borderRadius: 10,
+        padding: "12px 16px",
+        marginBottom: 20
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "#D4A017",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 6
+      }
+    }, "\u26A0\uFE0F YOUR CHALLENGE"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 13,
+        color: "rgba(255,255,255,0.8)",
+        lineHeight: 1.65,
+        fontFamily: "Georgia, serif"
+      }
+    }, "Every response you choose must come from ", /*#__PURE__*/React.createElement("em", null, "inside"), " your paradigm's logic. The other character will be using a different paradigm \u2014 your job is to notice the friction, stay in your lens, and figure out theirs.")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        marginBottom: 24
+      }
+    }, PARADIGM_NAMES.map(name => {
+      const pp = PARADIGMS[name];
+      const isSelected = selectedParadigm === name;
+      const isPrimary = name === assessmentResult?.primary;
+      return /*#__PURE__*/React.createElement("button", {
+        key: name,
+        onClick: () => setSelectedParadigm(name),
+        style: {
+          padding: "14px 16px",
+          textAlign: "left",
+          borderRadius: 12,
+          background: isSelected ? pp.color : "rgba(255,255,255,0.04)",
+          border: `1.5px solid ${isSelected ? pp.color : `${pp.color}55`}`,
+          color: "white",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: 12
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 22
+        }
+      }, pp.emoji), /*#__PURE__*/React.createElement("div", {
+        style: {
+          flex: 1
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 8
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 14,
+          fontWeight: "bold",
+          fontFamily: "Georgia, serif"
+        }
+      }, name), isPrimary && /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 9,
+          background: isSelected ? "rgba(255,255,255,0.25)" : pp.color,
+          color: "white",
+          padding: "2px 6px",
+          borderRadius: 8,
+          fontFamily: "monospace"
+        }
+      }, "YOUR PRIMARY")), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          color: isSelected ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)",
+          fontStyle: "italic"
+        }
+      }, pp.tagline)), isSelected && /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: "white",
+          fontSize: 18
+        }
+      }, "\u2713"));
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 10
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => setSelectionStep("role"),
+      style: {
+        padding: "16px",
+        background: "rgba(255,255,255,0.08)",
+        color: "rgba(255,255,255,0.6)",
+        border: "none",
+        borderRadius: 12,
+        fontSize: 14,
+        fontFamily: "Georgia, serif",
+        cursor: "pointer",
+        width: 80
+      }
+    }, "\u2190 Back"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        if (selectedParadigm) confirmSelections();
+      },
+      disabled: !selectedParadigm,
+      style: {
+        flex: 1,
+        padding: "16px",
+        background: selectedParadigm ? `linear-gradient(135deg, ${PARADIGMS[selectedParadigm]?.color || "#1B4F8A"}, #5B3A8A)` : "rgba(255,255,255,0.08)",
+        color: selectedParadigm ? "white" : "rgba(255,255,255,0.3)",
+        border: "none",
+        borderRadius: 12,
+        fontSize: 15,
+        fontFamily: "Georgia, serif",
+        cursor: selectedParadigm ? "pointer" : "not-allowed"
+      }
+    }, "Lock In My Paradigm \u2192")));
+  }
+
+  // Ready screen
+  if (selectionStep === "ready") {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "24px 20px",
+        maxWidth: 680,
+        margin: "0 auto",
+        overflowY: "auto",
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 20
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#D4A017",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 8
+      }
+    }, "STAGE 3 OF 5 \xB7 READY"), /*#__PURE__*/React.createElement("h2", {
+      style: {
+        margin: 0,
+        fontSize: 26,
+        fontWeight: "bold",
+        color: "white",
+        fontFamily: "Georgia, serif"
+      }
+    }, "Your Assignment")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        borderRadius: 16,
+        overflow: "hidden",
+        marginBottom: 20,
+        border: `2px solid ${p.color}`
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: p.color,
+        padding: "14px 20px",
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 28
+      }
+    }, p.emoji), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "rgba(255,255,255,0.7)",
+        fontFamily: "monospace",
+        letterSpacing: 2
+      }
+    }, "YOUR ROLE & PARADIGM"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 18,
+        color: "white",
+        fontWeight: "bold",
+        fontFamily: "Georgia, serif"
+      }
+    }, roleLabel, " \xB7 ", selectedParadigm))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(255,255,255,0.04)",
+        padding: "16px 20px"
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "0 0 12px",
+        fontSize: 13,
+        color: "rgba(255,255,255,0.85)",
+        fontStyle: "italic",
+        fontFamily: "Georgia, serif",
+        lineHeight: 1.6
+      }
+    }, card.reminder), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: p.color,
+        fontFamily: "monospace",
+        letterSpacing: 1,
+        marginBottom: 6
+      }
+    }, "YOUR APPROACH"), card.approach.map((a, i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        gap: 10,
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: p.color,
+        fontSize: 13,
+        flexShrink: 0
+      }
+    }, "\u203A"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: "rgba(255,255,255,0.7)",
+        lineHeight: 1.5
+      }
+    }, a)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(255,255,255,0.05)",
+        borderRadius: 8,
+        padding: "10px 12px"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: "#F97316",
+        fontFamily: "monospace"
+      }
+    }, "AVOID: "), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: "rgba(255,255,255,0.6)"
+      }
+    }, card.avoid)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(212,160,23,0.1)",
+        border: "1px solid rgba(212,160,23,0.35)",
+        borderRadius: 10,
+        padding: "14px 18px",
+        marginBottom: 16
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "#D4A017",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 6
+      }
+    }, "\u26A0\uFE0F STAY IN YOUR LENS"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 13,
+        color: "rgba(255,255,255,0.8)",
+        lineHeight: 1.65,
+        fontFamily: "Georgia, serif"
+      }
+    }, "Every response you pick must come from inside ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "#D4A017"
+      }
+    }, selectedParadigm), " logic. Even when the other person says something that pulls you toward a different approach \u2014 hold your lens. That friction is the point.")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: 10,
+        padding: "14px 18px",
+        marginBottom: 20,
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 24
+      }
+    }, "\uD83C\uDFAD"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "rgba(255,255,255,0.5)",
+        marginBottom: 2
+      }
+    }, "Talking with:"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 14,
+        color: "white",
+        fontFamily: "Georgia, serif"
+      }
+    }, /*#__PURE__*/React.createElement("strong", null, aiLabel), " \u2014 using an ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "#D4A017"
+      }
+    }, "unknown paradigm"), ". Pay close attention to how they frame things."))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(255,255,255,0.04)",
+        borderRadius: 10,
+        padding: "12px 16px",
+        marginBottom: 24,
+        fontSize: 12,
+        color: "rgba(255,255,255,0.5)",
+        lineHeight: 1.7
+      }
+    }, /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "rgba(255,255,255,0.7)"
+      }
+    }, maxTurns, " exchanges."), " Choose from three response options each turn \u2014 all come from different paradigms. Pick the one that sounds like ", /*#__PURE__*/React.createElement("em", null, "you"), " in your assigned lens. At the end, identify which paradigm the other character was using."), /*#__PURE__*/React.createElement("button", {
+      onClick: startConversation,
+      style: {
+        width: "100%",
+        padding: "16px",
+        background: p.color,
+        color: "white",
+        border: "none",
+        borderRadius: 12,
+        fontSize: 15,
+        fontFamily: "Georgia, serif",
+        cursor: "pointer"
+      }
+    }, "Start the Conversation \u2192"));
+  }
+
+  // Guess phase — two-column: transcript left, paradigm choices right
+  if (finished && guessMode && !revealed) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        minHeight: 0,
+        maxWidth: 1200,
+        width: "100%",
+        margin: "0 auto"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "14px 24px",
+        background: "rgba(255,255,255,0.03)",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#D4A017",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 2
+      }
+    }, "STEP 4 \u2014 IDENTIFY THE PARADIGM"), /*#__PURE__*/React.createElement("h2", {
+      style: {
+        margin: 0,
+        fontSize: 20,
+        color: "white",
+        fontFamily: "Georgia, serif"
+      }
+    }, "Review the conversation, then pick the paradigm the ", aiLabel, " was using.")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        display: "flex",
+        overflow: "hidden",
+        minHeight: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        overflowY: "auto",
+        minHeight: 0,
+        padding: "20px 16px 40px 24px",
+        borderRight: "1px solid rgba(255,255,255,0.08)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "rgba(255,255,255,0.3)",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 4
+      }
+    }, "CONVERSATION TRANSCRIPT"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "0 0 20px",
+        fontSize: 12,
+        color: "rgba(255,255,255,0.4)",
+        fontStyle: "italic",
+        fontFamily: "Georgia, serif"
+      }
+    }, "Read through the full conversation below. Look at how the ", aiLabel, " framed things \u2014 what they focused on, what they ignored, what they kept coming back to."), messages.map((msg, i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: msg.role === "user" ? "flex-end" : "flex-start",
+        marginBottom: 18
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "rgba(255,255,255,0.35)",
+        fontFamily: "monospace",
+        marginBottom: 4,
+        letterSpacing: 1
+      }
+    }, msg.role === "user" ? `YOU — ${roleLabel.toUpperCase()} (${selectedParadigm.toUpperCase()})` : `${aiLabel.toUpperCase()} — UNKNOWN PARADIGM`), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 8,
+        flexDirection: msg.role === "user" ? "row-reverse" : "row",
+        maxWidth: "88%"
+      }
+    }, msg.role === "ai" && /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 28,
+        height: 28,
+        borderRadius: "50%",
+        background: "rgba(255,255,255,0.15)",
+        border: "1px solid rgba(255,255,255,0.2)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        fontSize: 13
+      }
+    }, "?"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "12px 16px",
+        borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+        background: msg.role === "user" ? "rgba(37,99,235,0.25)" : "rgba(255,255,255,0.07)",
+        border: `1px solid ${msg.role === "user" ? "rgba(37,99,235,0.35)" : "rgba(255,255,255,0.1)"}`,
+        fontSize: 13,
+        color: "rgba(255,255,255,0.9)",
+        lineHeight: 1.7,
+        fontFamily: "Georgia, serif"
+      }
+    }, msg.text)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 8,
+        padding: "12px 16px",
+        background: "rgba(212,160,23,0.08)",
+        border: "1px solid rgba(212,160,23,0.25)",
+        borderRadius: 10
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 12,
+        color: "rgba(255,255,255,0.5)",
+        fontStyle: "italic",
+        fontFamily: "Georgia, serif",
+        lineHeight: 1.6
+      }
+    }, "That's the full conversation. Now use the panel on the right to identify which paradigm the ", aiLabel, " was operating from."))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 360,
+        flexShrink: 0,
+        overflowY: "auto",
+        padding: "20px 24px 24px 16px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "rgba(255,255,255,0.35)",
+        fontFamily: "monospace",
+        letterSpacing: 2,
+        marginBottom: 14
+      }
+    }, "SELECT A PARADIGM"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        marginBottom: 20
+      }
+    }, PARADIGM_NAMES.map(name => {
+      const pp = PARADIGMS[name];
+      const isSelected = guess === name;
+      return /*#__PURE__*/React.createElement("button", {
+        key: name,
+        onClick: () => setGuess(name),
+        style: {
+          padding: "13px 16px",
+          textAlign: "left",
+          borderRadius: 12,
+          background: isSelected ? `${pp.color}33` : "rgba(255,255,255,0.04)",
+          border: `1.5px solid ${isSelected ? pp.color : "rgba(255,255,255,0.1)"}`,
+          color: "white",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          transition: "all 0.15s"
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 20,
+          flexShrink: 0
+        }
+      }, pp.emoji), /*#__PURE__*/React.createElement("div", {
+        style: {
+          flex: 1
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 13,
+          fontWeight: "bold",
+          fontFamily: "Georgia, serif",
+          color: isSelected ? pp.color : "white"
+        }
+      }, name), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11,
+          color: "rgba(255,255,255,0.5)",
+          fontStyle: "italic",
+          marginTop: 2
+        }
+      }, pp.tagline)), isSelected && /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: pp.color,
+          fontSize: 16,
+          flexShrink: 0
+        }
+      }, "\u2713"));
+    })), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        if (guess) setRevealed(true);
+      },
+      disabled: !guess,
+      style: {
+        width: "100%",
+        padding: "14px",
+        background: guess ? "linear-gradient(135deg, #1B4F8A, #5B3A8A)" : "rgba(255,255,255,0.08)",
+        color: guess ? "white" : "rgba(255,255,255,0.3)",
+        border: "none",
+        borderRadius: 12,
+        fontSize: 14,
+        fontFamily: "Georgia, serif",
+        cursor: guess ? "pointer" : "not-allowed",
+        fontWeight: guess ? "bold" : "normal"
+      }
+    }, "Reveal the Answer \u2192"), !guess && /*#__PURE__*/React.createElement("p", {
+      style: {
+        textAlign: "center",
+        fontSize: 11,
+        color: "rgba(255,255,255,0.25)",
+        marginTop: 8,
+        fontStyle: "italic"
+      }
+    }, "Select a paradigm to continue"))));
+  }
+
+  // Reveal phase
+  if (revealed) {
+    const correct = guess === aiParadigm;
+    const ap = PARADIGMS[aiParadigm];
+    const gp = PARADIGMS[guess];
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "24px 20px",
+        maxWidth: 680,
+        margin: "0 auto",
+        overflowY: "auto",
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "center",
+        marginBottom: 24
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 48,
+        marginBottom: 8
+      }
+    }, correct ? "✅" : "🔄"), /*#__PURE__*/React.createElement("h2", {
+      style: {
+        margin: "0 0 4px",
+        fontSize: 24,
+        color: "white",
+        fontFamily: "Georgia, serif"
+      }
+    }, correct ? "You got it!" : "Not quite —"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 15,
+        color: "rgba(255,255,255,0.6)"
+      }
+    }, "The ", aiLabel, " was operating from ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: ap.color
+      }
+    }, aiParadigm))), !correct && /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: `${gp.color}22`,
+        border: `1px solid ${gp.color}55`,
+        borderRadius: 12,
+        padding: "14px 18px",
+        marginBottom: 16
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: gp.color,
+        fontFamily: "monospace",
+        marginBottom: 6
+      }
+    }, "YOU GUESSED: ", guess.toUpperCase()), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "0 0 8px",
+        fontSize: 13,
+        color: "rgba(255,255,255,0.75)",
+        lineHeight: 1.6,
+        fontFamily: "Georgia, serif"
+      }
+    }, /*#__PURE__*/React.createElement("strong", null, "Why ", guess, " might have felt right:"), " ", gp.tagline, " \u2014 Both paradigms can sound like they're questioning the situation, which makes them easy to confuse in conversation."), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 13,
+        color: "rgba(255,255,255,0.6)",
+        lineHeight: 1.6,
+        fontFamily: "Georgia, serif"
+      }
+    }, /*#__PURE__*/React.createElement("strong", null, "The key difference:"), " ", gp.supervisorCard?.reminder || gp.employeeCard?.reminder)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: `${ap.color}22`,
+        border: `1px solid ${ap.color}55`,
+        borderRadius: 12,
+        padding: "14px 18px",
+        marginBottom: 16
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: ap.color,
+        fontFamily: "monospace",
+        marginBottom: 6
+      }
+    }, "THE CHARACTER WAS: ", aiParadigm.toUpperCase()), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "0 0 8px",
+        fontSize: 13,
+        color: "rgba(255,255,255,0.85)",
+        lineHeight: 1.6,
+        fontFamily: "Georgia, serif"
+      }
+    }, /*#__PURE__*/React.createElement("strong", null, "Why:"), " ", ap.tagline), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 13,
+        color: "rgba(255,255,255,0.65)",
+        lineHeight: 1.6,
+        fontFamily: "Georgia, serif"
+      }
+    }, /*#__PURE__*/React.createElement("strong", null, "The tells:"), " ", oppositeRole === "supervisor" ? ap.supervisorCard.reminder : ap.employeeCard.reminder)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: `${p.color}22`,
+        border: `1px solid ${p.color}55`,
+        borderRadius: 12,
+        padding: "14px 18px",
+        marginBottom: 24
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: p.color,
+        fontFamily: "monospace",
+        marginBottom: 6
+      }
+    }, "YOUR PARADIGM WAS: ", selectedParadigm.toUpperCase()), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontSize: 13,
+        color: "rgba(255,255,255,0.65)",
+        lineHeight: 1.6,
+        fontFamily: "Georgia, serif"
+      }
+    }, "You were seeing through a ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: p.color
+      }
+    }, selectedParadigm), " lens while the ", aiLabel, " was operating from ", /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: ap.color
+      }
+    }, aiParadigm), ". Think about where those two worldviews created friction or talked past each other \u2014 that's what you'll reflect on next.")), /*#__PURE__*/React.createElement("button", {
+      onClick: () => onNext({
+        studentParadigm: selectedParadigm,
+        aiParadigm,
+        studentRole: selectedRole,
+        aiRole: oppositeRole,
+        guessCorrect: guess === aiParadigm,
+        messages,
+        choiceLog
+      }),
+      style: {
+        width: "100%",
+        padding: "16px",
+        background: "linear-gradient(135deg, #166534, #1B4F8A)",
+        color: "white",
+        border: "none",
+        borderRadius: 12,
+        fontSize: 15,
+        fontFamily: "Georgia, serif",
+        cursor: "pointer"
+      }
+    }, "View Session Summary \u2192"));
+  }
+
+  // Chat interface — two-column layout
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      flex: 1,
+      minHeight: 0,
+      maxWidth: 1200,
+      width: "100%",
+      margin: "0 auto"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 20px",
+      background: "rgba(255,255,255,0.03)",
+      borderBottom: "1px solid rgba(255,255,255,0.08)",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: p.color,
+      fontFamily: "monospace"
+    }
+  }, "YOU: ", roleLabel.toUpperCase(), " \xB7 ", selectedParadigm.toUpperCase()), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "rgba(255,255,255,0.6)"
+    }
+  }, "Talking with: ", aiLabel)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "rgba(255,255,255,0.4)",
+      fontFamily: "monospace"
+    }
+  }, turnCount, "/", maxTurns)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 3,
+      background: "rgba(255,255,255,0.1)",
+      borderRadius: 2,
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: "100%",
+      width: `${turnCount / maxTurns * 100}%`,
+      background: p.color,
+      borderRadius: 2,
+      transition: "width 0.3s"
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      display: "flex",
+      overflow: "hidden",
+      minHeight: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      padding: "20px 16px 20px 20px",
+      borderRight: "1px solid rgba(255,255,255,0.08)"
+    }
+  }, messages.map((msg, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: "flex",
+      justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
+      marginBottom: 14
+    }
+  }, msg.role === "ai" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 30,
+      height: 30,
+      borderRadius: "50%",
+      background: p.color,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+      marginRight: 8,
+      fontSize: 14
+    }
+  }, p.emoji), /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: "85%",
+      padding: "11px 15px",
+      borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+      background: msg.role === "user" ? "rgba(37,99,235,0.3)" : "rgba(255,255,255,0.08)",
+      border: `1px solid ${msg.role === "user" ? "rgba(37,99,235,0.4)" : "rgba(255,255,255,0.1)"}`,
+      fontSize: 13,
+      color: "rgba(255,255,255,0.9)",
+      lineHeight: 1.65,
+      fontFamily: "Georgia, serif"
+    }
+  }, msg.text))), typing && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 30,
+      height: 30,
+      borderRadius: "50%",
+      background: p.color,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 14
+    }
+  }, p.emoji), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "11px 15px",
+      background: "rgba(255,255,255,0.08)",
+      borderRadius: "16px 16px 16px 4px",
+      display: "flex",
+      gap: 4,
+      alignItems: "center"
+    }
+  }, [0, 1, 2].map(i => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      width: 6,
+      height: 6,
+      borderRadius: "50%",
+      background: "rgba(255,255,255,0.5)",
+      animation: "bounce 1.2s infinite",
+      animationDelay: `${i * 0.2}s`
+    }
+  })))), finished && !guessMode && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "16px",
+      background: "rgba(212,160,23,0.1)",
+      borderRadius: 12,
+      border: "1px solid rgba(212,160,23,0.3)",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 12px",
+      fontSize: 14,
+      color: "rgba(255,255,255,0.8)",
+      fontStyle: "italic"
+    }
+  }, "Conversation complete. Which paradigm do you think the ", aiLabel, " was using?"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setGuessMode(true),
+    style: {
+      padding: "10px 24px",
+      background: "#D4A017",
+      color: "#0F2137",
+      border: "none",
+      borderRadius: 8,
+      fontSize: 14,
+      fontWeight: "bold",
+      fontFamily: "Georgia, serif",
+      cursor: "pointer"
+    }
+  }, "Make Your Guess \u2192")), /*#__PURE__*/React.createElement("div", {
+    ref: bottomRef
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 380,
+      flexShrink: 0,
+      overflowY: "auto",
+      padding: "16px 20px 20px 16px",
+      display: "flex",
+      flexDirection: "column"
+    }
+  }, wrongFeedback && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(239,68,68,0.08)",
+      border: "1.5px solid rgba(239,68,68,0.4)",
+      borderRadius: 14,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(239,68,68,0.22)",
+      padding: "10px 14px",
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 20
+    }
+  }, "\u274C"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#FCA5A5",
+      fontFamily: "monospace",
+      letterSpacing: 1
+    }
+  }, "WRONG PARADIGM"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "white",
+      fontWeight: "bold",
+      fontFamily: "Georgia, serif"
+    }
+  }, "That was ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: wrongFeedback.chosenParadigm !== "None" ? PARADIGMS[wrongFeedback.chosenParadigm]?.color || "#FCA5A5" : "#FCA5A5"
+    }
+  }, wrongFeedback.chosenParadigm !== "None" ? wrongFeedback.chosenParadigm : "off-paradigm"), " \u2014 not ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: p.color
+    }
+  }, selectedParadigm)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 14px",
+      borderBottom: "1px solid rgba(255,255,255,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "#FCA5A5",
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 4
+    }
+  }, "YOU PICKED"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 12,
+      color: "rgba(255,255,255,0.5)",
+      fontStyle: "italic",
+      fontFamily: "Georgia, serif",
+      lineHeight: 1.5
+    }
+  }, "\"", wrongFeedback.chosenText, "\"")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 14px",
+      borderBottom: "1px solid rgba(255,255,255,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "#FCA5A5",
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 4
+    }
+  }, "WHY THIS IS ", wrongFeedback.chosenParadigm !== "None" ? wrongFeedback.chosenParadigm.toUpperCase() : "OFF-PARADIGM"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 12,
+      color: "rgba(255,255,255,0.85)",
+      fontFamily: "Georgia, serif",
+      lineHeight: 1.65
+    }
+  }, wrongFeedback.explanation.why)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 14px",
+      background: `${p.color}15`,
+      borderBottom: "1px solid rgba(255,255,255,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: p.color,
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 4
+    }
+  }, "WHAT ", selectedParadigm.toUpperCase(), " ACTUALLY SOUNDS LIKE"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 12,
+      color: "rgba(255,255,255,0.8)",
+      fontFamily: "Georgia, serif",
+      lineHeight: 1.65
+    }
+  }, wrongFeedback.explanation.howToFix)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 14px"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setWrongFeedback(null),
+    style: {
+      width: "100%",
+      padding: "11px 14px",
+      background: p.color,
+      color: "white",
+      border: "none",
+      borderRadius: 8,
+      fontSize: 13,
+      fontFamily: "Georgia, serif",
+      cursor: "pointer",
+      fontWeight: "bold"
+    }
+  }, "Got it \u2014 go back and pick the right one"))), rightFeedback && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(34,197,94,0.08)",
+      border: "1.5px solid rgba(34,197,94,0.4)",
+      borderRadius: 14,
+      overflow: "hidden",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(34,197,94,0.18)",
+      padding: "10px 14px",
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 20
+    }
+  }, "\u2705"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#86EFAC",
+      fontFamily: "monospace",
+      letterSpacing: 1
+    }
+  }, "CORRECT PARADIGM"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "white",
+      fontWeight: "bold",
+      fontFamily: "Georgia, serif"
+    }
+  }, "That's ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: p.color
+    }
+  }, selectedParadigm)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 14px",
+      borderBottom: "1px solid rgba(255,255,255,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "#86EFAC",
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 4
+    }
+  }, "YOU PICKED"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 12,
+      color: "rgba(255,255,255,0.85)",
+      fontStyle: "italic",
+      fontFamily: "Georgia, serif",
+      lineHeight: 1.5
+    }
+  }, "\"", rightFeedback.chosenText, "\"")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 14px",
+      background: `${p.color}12`,
+      borderBottom: "1px solid rgba(255,255,255,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: p.color,
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 4
+    }
+  }, "WHY THIS IS ", selectedParadigm.toUpperCase()), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 12,
+      color: "rgba(255,255,255,0.85)",
+      fontFamily: "Georgia, serif",
+      lineHeight: 1.65
+    }
+  }, PARADIGMS[selectedParadigm]?.supervisorCard?.reminder || PARADIGMS[selectedParadigm]?.employeeCard?.reminder)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 14px"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => advanceTurn(rightFeedback.pendingAdvance),
+    style: {
+      width: "100%",
+      padding: "11px 14px",
+      background: p.color,
+      color: "white",
+      border: "none",
+      borderRadius: 8,
+      fontSize: 13,
+      fontFamily: "Georgia, serif",
+      cursor: "pointer",
+      fontWeight: "bold"
+    }
+  }, "Continue the conversation \u2192"))), waitingForChoice && !typing && !wrongFeedback && !rightFeedback && currentOptions.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#D4A017",
+      fontFamily: "monospace",
+      letterSpacing: 2,
+      marginBottom: 12,
+      textAlign: "center"
+    }
+  }, "CHOOSE YOUR RESPONSE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: `${p.color}cc`,
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 10,
+      textAlign: "center"
+    }
+  }, "STAY IN YOUR ", selectedParadigm.toUpperCase(), " LENS"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8
+    }
+  }, currentOptions.map((opt, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => chooseOption(opt),
+    style: {
+      padding: "12px 14px",
+      textAlign: "left",
+      background: "rgba(255,255,255,0.06)",
+      border: `1px solid ${p.color}55`,
+      borderRadius: 10,
+      color: "rgba(255,255,255,0.88)",
+      fontSize: 13,
+      fontFamily: "Georgia, serif",
+      cursor: "pointer",
+      lineHeight: 1.55,
+      width: "100%"
+    },
+    onMouseEnter: e => {
+      e.currentTarget.style.background = `${p.color}33`;
+      e.currentTarget.style.borderColor = p.color;
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+      e.currentTarget.style.borderColor = `${p.color}55`;
+    }
+  }, opt.text)))), typing && !wrongFeedback && !rightFeedback && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "100%",
+      color: "rgba(255,255,255,0.3)",
+      fontSize: 13,
+      fontStyle: "italic",
+      fontFamily: "Georgia, serif"
+    }
+  }, "Waiting for response\u2026"), finished && !guessMode && !wrongFeedback && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      color: "rgba(255,255,255,0.4)",
+      fontSize: 13,
+      fontStyle: "italic"
+    }
+  }, "See the conversation \u2192")))), /*#__PURE__*/React.createElement("style", null, `@keyframes bounce { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-4px);opacity:1} }`));
+}
+
+// ─── STAGE 3: REFLECTION ──────────────────────────────────────────────────────
+
+function SessionSummary({
+  summary
+}) {
+  if (!summary) return null;
+  const sp = PARADIGMS[summary.studentParadigm];
+  const ap = PARADIGMS[summary.aiParadigm];
+  const roleLabel = summary.studentRole === "supervisor" ? "Supervisor" : "Jordan (Employee)";
+  const aiLabel = summary.aiRole === "supervisor" ? "Supervisor" : "Jordan (Employee)";
+  const log = summary.choiceLog || [];
+
+  // Interleave messages with choice log for turn-by-turn view
+  // AI messages are at even indices, student messages at odd indices
+  const turns = [];
+  for (let i = 0; i < summary.messages.length; i++) {
+    const msg = summary.messages[i];
+    if (msg.role === "ai") {
+      // Find the matching student choice (turn = index/2 + 1)
+      const turnNum = Math.floor(i / 2) + 1;
+      const choice = log.find(c => c.turn === turnNum);
+      const studentMsg = summary.messages[i + 1];
+      turns.push({
+        aiMsg: msg,
+        studentMsg,
+        choice,
+        turnNum
+      });
+    }
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(255,255,255,0.02)",
+      border: "1px solid rgba(255,255,255,0.1)",
+      borderRadius: 14,
+      overflow: "hidden",
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 18px",
+      background: "rgba(212,160,23,0.12)",
+      borderBottom: "1px solid rgba(212,160,23,0.2)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#D4A017",
+      fontFamily: "monospace",
+      letterSpacing: 2,
+      marginBottom: 4
+    }
+  }, "YOUR SESSION SUMMARY"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "rgba(255,255,255,0.7)",
+      fontFamily: "Georgia, serif"
+    }
+  }, "Use this to answer the questions below. Everything you said and chose is recorded here.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderBottom: "1px solid rgba(255,255,255,0.07)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 16px",
+      background: "rgba(255,255,255,0.03)",
+      borderBottom: "1px solid rgba(255,255,255,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(255,255,255,0.4)",
+      fontFamily: "monospace",
+      letterSpacing: 2
+    }
+  }, "PARADIGM DEFINITIONS \u2014 YOUR ANSWER KEY")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr"
+    }
+  }, [{
+    label: "YOUR PARADIGM",
+    name: summary.studentParadigm,
+    role: `as ${roleLabel}`,
+    p: sp
+  }, {
+    label: "THEIR PARADIGM",
+    name: summary.aiParadigm,
+    role: `as ${aiLabel}`,
+    p: ap
+  }].map((item, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      padding: "14px 16px",
+      borderRight: i === 0 ? "1px solid rgba(255,255,255,0.07)" : "none"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: item.p.color,
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 8
+    }
+  }, item.label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 22
+    }
+  }, item.p.emoji), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      fontWeight: "bold",
+      color: "white",
+      fontFamily: "Georgia, serif"
+    }
+  }, item.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "rgba(255,255,255,0.45)",
+      fontStyle: "italic"
+    }
+  }, item.role))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: item.p.color,
+      fontStyle: "italic",
+      lineHeight: 1.5,
+      marginBottom: 10,
+      paddingBottom: 10,
+      borderBottom: `1px solid ${item.p.color}33`
+    }
+  }, item.p.tagline), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: item.p.color,
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 3
+    }
+  }, "WHAT IS REAL?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "rgba(255,255,255,0.7)",
+      lineHeight: 1.55
+    }
+  }, item.p.ont)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: item.p.color,
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 3
+    }
+  }, "HOW DO WE KNOW?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "rgba(255,255,255,0.7)",
+      lineHeight: 1.55
+    }
+  }, item.p.epist)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: item.p.color,
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 3
+    }
+  }, "WHAT MATTERS?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "rgba(255,255,255,0.7)",
+      lineHeight: 1.55
+    }
+  }, item.p.axio))))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: "1px solid rgba(255,255,255,0.07)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(255,255,255,0.4)",
+      fontFamily: "monospace",
+      letterSpacing: 2,
+      marginBottom: 14
+    }
+  }, "TURN-BY-TURN \u2014 WHAT YOU CHOSE AND HOW YOU DID"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 16
+    }
+  }, turns.map(({
+    aiMsg,
+    studentMsg,
+    choice,
+    turnNum
+  }) => /*#__PURE__*/React.createElement("div", {
+    key: turnNum,
+    style: {
+      borderLeft: `3px solid ${choice?.wasWrong ? "#EF4444" : sp.color}`,
+      paddingLeft: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "rgba(255,255,255,0.35)",
+      fontFamily: "monospace"
+    }
+  }, "TURN ", turnNum), choice && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 8,
+      fontFamily: "monospace",
+      background: choice.wasWrong ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.15)",
+      color: choice.wasWrong ? "#FCA5A5" : "#86EFAC",
+      border: `1px solid ${choice.wasWrong ? "rgba(239,68,68,0.4)" : "rgba(34,197,94,0.3)"}`
+    }
+  }, choice.wasWrong ? "❌ needed correction" : "✓ first try")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: ap.color,
+      fontFamily: "monospace",
+      marginBottom: 4
+    }
+  }, aiLabel.toUpperCase(), " (", summary.aiParadigm.toUpperCase(), ") SAID:"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "8px 12px",
+      background: `${ap.color}18`,
+      border: `1px solid ${ap.color}33`,
+      borderRadius: "10px 10px 10px 3px",
+      fontSize: 12,
+      color: "rgba(255,255,255,0.8)",
+      lineHeight: 1.6,
+      fontFamily: "Georgia, serif",
+      fontStyle: "italic"
+    }
+  }, aiMsg.text)), choice?.wasWrong && choice.wrongAttempts?.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 8
+    }
+  }, choice.wrongAttempts.map((attempt, ai) => {
+    const key = `${summary.studentParadigm} → ${attempt.paradigm}`;
+    const expl = MISMATCH_EXPLANATIONS[key];
+    return /*#__PURE__*/React.createElement("div", {
+      key: ai,
+      style: {
+        marginBottom: 8,
+        background: "rgba(239,68,68,0.06)",
+        border: "1px solid rgba(239,68,68,0.25)",
+        borderRadius: 10,
+        overflow: "hidden"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "6px 10px",
+        background: "rgba(239,68,68,0.12)",
+        borderBottom: "1px solid rgba(239,68,68,0.15)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: "#FCA5A5",
+        fontFamily: "monospace",
+        letterSpacing: 1
+      }
+    }, "\u2717 WRONG \u2014 YOU PICKED ", attempt.paradigm.toUpperCase())), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "8px 10px",
+        borderBottom: expl ? "1px solid rgba(239,68,68,0.1)" : "none"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "rgba(255,255,255,0.45)",
+        lineHeight: 1.55,
+        fontFamily: "Georgia, serif",
+        fontStyle: "italic",
+        textDecoration: "line-through"
+      }
+    }, "\"", attempt.text, "\"")), expl && /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "8px 10px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: "#FCA5A5",
+        fontFamily: "monospace",
+        letterSpacing: 1,
+        marginBottom: 3
+      }
+    }, "WHY THIS IS ", attempt.paradigm.toUpperCase(), ", NOT ", summary.studentParadigm.toUpperCase()), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "rgba(255,255,255,0.75)",
+        lineHeight: 1.6,
+        fontFamily: "Georgia, serif"
+      }
+    }, expl.why)));
+  })), studentMsg && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: sp.color,
+      fontFamily: "monospace",
+      marginBottom: 4
+    }
+  }, "YOU RESPONDED (", summary.studentParadigm.toUpperCase(), "):"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "8px 12px",
+      background: `${sp.color}18`,
+      border: `1px solid ${sp.color}44`,
+      borderRadius: "10px 10px 3px 10px",
+      fontSize: 12,
+      color: "rgba(255,255,255,0.9)",
+      lineHeight: 1.6,
+      fontFamily: "Georgia, serif"
+    }
+  }, studentMsg.text)))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      background: summary.guessCorrect ? "rgba(34,197,94,0.06)" : "rgba(239,68,68,0.06)",
+      borderBottom: "1px solid rgba(255,255,255,0.07)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(255,255,255,0.4)",
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 6
+    }
+  }, "YOUR PARADIGM GUESS"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "flex-start",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 22,
+      flexShrink: 0
+    }
+  }, summary.guessCorrect ? "✅" : "❌"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "rgba(255,255,255,0.85)",
+      fontFamily: "Georgia, serif",
+      lineHeight: 1.6
+    }
+  }, summary.guessCorrect ? /*#__PURE__*/React.createElement("span", null, "You correctly identified ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: ap.color
+    }
+  }, summary.aiParadigm), " as the ", aiLabel, "'s paradigm. Go back through their responses above \u2014 you can now see exactly how that lens shaped everything they said.") : /*#__PURE__*/React.createElement("span", null, "You guessed wrong. The ", aiLabel, " was using ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: ap.color
+    }
+  }, summary.aiParadigm), ". Read their messages above again \u2014 notice how they kept framing everything through the lens of: ", /*#__PURE__*/React.createElement("em", {
+    style: {
+      color: ap.color
+    }
+  }, ap.tagline))))));
+}
+function SummaryStage({
+  summary
+}) {
+  const [showExport, setShowExport] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const textareaRef = useRef(null);
+  function buildPlainText() {
+    if (!summary) return "";
+    const sp = PARADIGMS[summary.studentParadigm];
+    const ap = PARADIGMS[summary.aiParadigm];
+    const roleLabel = summary.studentRole === "supervisor" ? "Supervisor" : "Jordan (Employee)";
+    const aiLabel = summary.aiRole === "supervisor" ? "Supervisor" : "Jordan (Employee)";
+    const log = summary.choiceLog || [];
+    let txt = "TGE 1150 — Paradigm Role-Play Session Summary\n";
+    txt += "=".repeat(50) + "\n\n";
+    txt += `YOUR PARADIGM: ${summary.studentParadigm} (as ${roleLabel})\n`;
+    txt += `  "${sp.tagline}"\n\n`;
+    txt += `THEIR PARADIGM: ${summary.aiParadigm} (as ${aiLabel})\n`;
+    txt += `  "${ap.tagline}"\n\n`;
+    txt += `PARADIGM GUESS: ${summary.guessCorrect ? "CORRECT ✓" : "INCORRECT — answer was " + summary.aiParadigm}\n\n`;
+    txt += "-".repeat(50) + "\nTURN-BY-TURN CHOICES\n" + "-".repeat(50) + "\n\n";
+    const messages = summary.messages || [];
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      if (msg.role === "ai") {
+        const turnNum = Math.floor(i / 2) + 1;
+        const choice = log.find(c => c.turn === turnNum);
+        const studentMsg = messages[i + 1];
+        txt += `TURN ${turnNum}\n`;
+        txt += `${aiLabel.toUpperCase()} (${summary.aiParadigm}) SAID:\n  "${msg.text}"\n\n`;
+        if (choice?.wasWrong && choice.wrongAttempts?.length > 0) {
+          choice.wrongAttempts.forEach(a => {
+            txt += `  [WRONG — picked ${a.paradigm}]\n`;
+            txt += `  x "${a.text}"\n`;
+            const key = `${summary.studentParadigm} → ${a.paradigm}`;
+            const expl = MISMATCH_EXPLANATIONS[key];
+            if (expl) txt += `  WHY: ${expl.why}\n`;
+            txt += "\n";
+          });
+        } else {
+          txt += "  [CORRECT ON FIRST TRY]\n\n";
+        }
+        if (studentMsg) txt += `YOU (${summary.studentParadigm}) RESPONDED:\n  "${studentMsg.text}"\n\n`;
+      }
+    }
+    txt += "=".repeat(50) + "\nGenerated by TGE 1150 Paradigm Lesson · ISU\n";
+    return txt;
+  }
+  function handleCopy() {
+    const text = buildPlainText();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      }).catch(() => {
+        setShowExport(true);
+      });
+    } else {
+      setShowExport(true);
+    }
+  }
+  useEffect(() => {
+    if (showExport && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.select();
+    }
+  }, [showExport]);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "24px 20px",
+      maxWidth: 680,
+      margin: "0 auto"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#D4A017",
+      fontFamily: "monospace",
+      letterSpacing: 2,
+      marginBottom: 8
+    }
+  }, "STAGE 4 OF 4 \xB7 COMPLETE"), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: 0,
+      fontSize: 26,
+      fontWeight: "bold",
+      color: "white",
+      fontFamily: "Georgia, serif"
+    }
+  }, "Session Summary"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "8px 0 0",
+      fontSize: 14,
+      color: "rgba(255,255,255,0.55)",
+      fontStyle: "italic",
+      fontFamily: "Georgia, serif"
+    }
+  }, "Your full session is recorded below.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(147,51,234,0.12)",
+      border: "1px solid rgba(147,51,234,0.4)",
+      borderRadius: 14,
+      padding: "16px 20px",
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#C084FC",
+      fontFamily: "monospace",
+      letterSpacing: 2,
+      marginBottom: 8
+    }
+  }, "\uD83C\uDFA5 VIDEO REFLECTION \u2014 RECORD BEFORE YOU LEAVE"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 10px",
+      fontSize: 14,
+      color: "white",
+      fontFamily: "Georgia, serif",
+      fontWeight: "bold",
+      lineHeight: 1.5
+    }
+  }, "When two people operate from different paradigms, they often talk past each other \u2014 not because they disagree, but because they're not even asking the same questions."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 13,
+      color: "rgba(255,255,255,0.75)",
+      fontFamily: "Georgia, serif",
+      fontStyle: "italic",
+      lineHeight: 1.65
+    }
+  }, "Think about the conversation you just had. ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "#C084FC"
+    }
+  }, "Where did the paradigm difference create friction?"), " What did the other person keep focusing on that you weren't \u2014 and what does that tell you about how they see the world? Film a 60\u201390 second response and submit it to Canvas.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(212,160,23,0.12)",
+      border: "1.5px solid rgba(212,160,23,0.45)",
+      borderRadius: 14,
+      padding: "14px 18px",
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#D4A017",
+      fontFamily: "monospace",
+      letterSpacing: 2,
+      marginBottom: 6
+    }
+  }, "\uD83D\uDCCB CANVAS SUBMISSION \u2014 REQUIRED"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 8px",
+      fontSize: 13,
+      color: "white",
+      fontFamily: "Georgia, serif",
+      fontWeight: "bold",
+      lineHeight: 1.5
+    }
+  }, "You must submit your session transcript to Canvas to receive credit."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 13,
+      color: "rgba(255,255,255,0.75)",
+      fontFamily: "Georgia, serif",
+      lineHeight: 1.6
+    }
+  }, "Use the ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "#D4A017"
+    }
+  }, "Copy Summary Text"), " button below (or ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "#D4A017"
+    }
+  }, "Show text"), " to select manually), then paste it into the Canvas assignment text box and submit.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: handleCopy,
+    style: {
+      flex: 1,
+      padding: "14px",
+      background: copied ? "rgba(34,197,94,0.2)" : "rgba(37,99,235,0.15)",
+      border: `1px solid ${copied ? "rgba(34,197,94,0.5)" : "rgba(37,99,235,0.4)"}`,
+      borderRadius: 10,
+      color: "white",
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+      fontSize: 14,
+      fontWeight: "bold"
+    }
+  }, copied ? "✅ Copied to clipboard!" : "📋 Copy Summary Text"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowExport(v => !v),
+    style: {
+      padding: "14px 16px",
+      background: "rgba(255,255,255,0.06)",
+      border: "1px solid rgba(255,255,255,0.15)",
+      borderRadius: 10,
+      color: "rgba(255,255,255,0.6)",
+      cursor: "pointer",
+      fontFamily: "Georgia, serif",
+      fontSize: 13
+    }
+  }, showExport ? "Hide text" : "Show text")), showExport && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#D4A017",
+      fontFamily: "monospace",
+      letterSpacing: 1,
+      marginBottom: 6
+    }
+  }, "SELECT ALL \u2192 COPY (Ctrl+A, Ctrl+C / Cmd+A, Cmd+C)"), /*#__PURE__*/React.createElement("textarea", {
+    ref: textareaRef,
+    readOnly: true,
+    value: buildPlainText(),
+    rows: 12,
+    style: {
+      width: "100%",
+      padding: "12px",
+      background: "rgba(0,0,0,0.4)",
+      border: "1px solid rgba(255,255,255,0.2)",
+      borderRadius: 10,
+      color: "rgba(255,255,255,0.9)",
+      fontSize: 12,
+      fontFamily: "monospace",
+      resize: "vertical",
+      outline: "none",
+      boxSizing: "border-box",
+      lineHeight: 1.6
+    }
+  })), /*#__PURE__*/React.createElement(SessionSummary, {
+    summary: summary
+  }));
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+
+function App() {
+  const [stage, setStage] = useState("assessment");
+  const [assessmentResult, setAssessmentResult] = useState(null);
+  const [roleplaySummary, setRoleplaySummary] = useState(null);
+  function handleAssessmentComplete(result) {
+    setAssessmentResult(result);
+    setStage("reference");
+  }
+  function handleRoleplayComplete(summary) {
+    setRoleplaySummary(summary);
+    setStage("summary");
+  }
+  const isRoleplay = stage === "roleplay";
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      background: "linear-gradient(160deg, #0F2137 0%, #1B3A5C 50%, #0F2137 100%)",
+      color: "white"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flexShrink: 0,
+      zIndex: 100,
+      background: "rgba(15,33,55,0.95)",
+      backdropFilter: "blur(10px)",
+      borderBottom: "1px solid rgba(255,255,255,0.08)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 20px",
+      maxWidth: isRoleplay ? "none" : 680,
+      margin: "0 auto"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: "rgba(255,255,255,0.4)",
+      fontFamily: "monospace",
+      letterSpacing: 2
+    }
+  }, "TGE 1150 \xB7 ISU"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      color: "white",
+      fontWeight: "bold",
+      fontFamily: "Georgia, serif"
+    }
+  }, "What Is Your Paradigm?")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4
+    }
+  }, STAGES.map((s, i) => /*#__PURE__*/React.createElement("button", {
+    key: s,
+    onClick: () => {
+      if (STAGES.indexOf(stage) >= i) setStage(s);
+    },
+    style: {
+      width: 26,
+      height: 26,
+      borderRadius: "50%",
+      background: s === stage ? "#D4A017" : STAGES.indexOf(stage) > i ? "rgba(212,160,23,0.3)" : "rgba(255,255,255,0.08)",
+      border: "none",
+      cursor: STAGES.indexOf(stage) >= i ? "pointer" : "not-allowed",
+      color: "white",
+      fontSize: 10,
+      fontWeight: "bold"
+    }
+  }, i + 1)))), /*#__PURE__*/React.createElement(ProgressBar, {
+    stage: stage
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minHeight: 0,
+      overflowY: isRoleplay ? "hidden" : "auto",
+      display: isRoleplay ? "flex" : "block",
+      flexDirection: "column"
+    }
+  }, stage === "assessment" && /*#__PURE__*/React.createElement(AssessmentStage, {
+    onComplete: handleAssessmentComplete
+  }), stage === "reference" && /*#__PURE__*/React.createElement(ReferenceCard, {
+    assessmentResult: assessmentResult,
+    onNext: () => setStage("roleplay")
+  }), stage === "roleplay" && /*#__PURE__*/React.createElement(RolePlaySimulator, {
+    assessmentResult: assessmentResult,
+    onNext: handleRoleplayComplete
+  }), stage === "summary" && /*#__PURE__*/React.createElement(SummaryStage, {
+    summary: roleplaySummary
+  })));
+}
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
